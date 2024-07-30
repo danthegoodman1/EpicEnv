@@ -1,0 +1,30 @@
+/*
+Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+*/
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+// setCmd represents the set command
+var setCmd = &cobra.Command{
+	Use:   "set",
+	Short: "Set an environment variable",
+	Long: `Set an environment variable
+
+Use -p to set a personal variable.
+
+If you attempt to normal set a personal variable, it will update the personal variable instead. To make a personal variable shared, first rm the variable, then set it again as shared.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("set called")
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(setCmd)
+
+	setCmd.Flags().BoolP("personal", "p", false, "Set this as a personal environment if it doesn't exist")
+}

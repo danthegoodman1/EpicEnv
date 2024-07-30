@@ -58,6 +58,16 @@ Collaborators are invited via their GitHub usernames.  They must have at least 1
 epicenv invite danthegoodman1
 ```
 
+and you can uninvite them with
+
+```
+epicenv uninvite danthegoodman1
+```
+
+Which will re-encrypt all values, removing their access.
+
+**Note that if they do not pull, or do not re-source, then the values are accessible by them. This is not a replacement for rotating secrets!**
+
 ### Source the environment
 
 ```
@@ -80,7 +90,7 @@ git commit -m "add epicenv"
 You can remove global and personal variables with:
 
 ```
-epicenv remove [KEY]
+epicenv rm [KEY]
 ```
 
 ## Motivation
@@ -114,3 +124,5 @@ These are the same logs written to the console.
 If you attempt to `epicenv set` on a variable that is marked as personal, that set will update the personal variable instead of adding to the global variables to prevent personal values from being leaked via git.
 
 A warning will be thrown when this occurs.
+
+To make a personal variable shared, first `rm` the personal variable, then set it again as shared. Vice-versa for making a shared variable personal.
