@@ -12,17 +12,23 @@ go install github.com/epicenv@latest
 
 ### Initialize EpicEnv
 
+Within your project directory, run:
+
 ```
 epicenv init
 ```
 
-### Add environment variables
+This will create a `.epicenv` directory, and add `.epicenv/personal` to your `.gitignore`.
+
+### Add shared environment variables
 
 You can add individual variables with:
 
 ```
 epicenv set [KEY] [VALUE]
 ```
+
+You can run this again to replace values as well.
 
 _Pro-tip: put a space before typing the command to prevent it from being added to your shell history (thus preventing leaks)_
 
@@ -32,17 +38,50 @@ You can also import an existing `.env` file with:
 epicenv import [PATH]
 ```
 
-### Invite colleagues
+### Add personal environment variables
 
-**2) Invite your colleagues via their Github usernames**
+For something like database or AWS credentials, you'll want to use (and enforce) using local credentials.
 
-_They must have at least 1 key added to their account, which can be checked at `github.com/{username}.keys`_
+```
+epicenv set [KEY] [VALUE] -p
+```
 
-**3) You commit and push the encrypted environment to your git repo**
+This will mark the env var as personal, preventing it from being committed to git.
 
-Now everyone can share updated env vars!
+If someone sources the environment in the future without setting their own personal value, they will see a warning in the console notifying them that they are missing part of the environment.
 
-**4) You source the env **
+### Invite collaborators
+
+Collaborators are invited via their GitHub usernames.  They must have at least 1 key added to their account, which can be checked at `github.com/{username}.keys`.
+
+```
+epicenv invite danthegoodman1
+```
+
+### Source the environment
+
+```
+source .epicenv/activate
+```
+
+Your local shell will decrypt and load the variables into the environment!
+
+You can also run this command to update the local environment when changes are pulled from GitHub.
+
+### Commit the `.epicenv` directory
+
+```
+git add .epicenv/*
+git commit -m "add epicenv"
+```
+
+### Remove variables
+
+You can remove global and personal variables with:
+
+```
+epicenv remove [KEY]
+```
 
 ## Motivation
 
@@ -60,10 +99,18 @@ EpicEnv creates encrypted environment variables for you local environment, shari
 
 Environment variables are encrypted using your `github.com/{username}.keys` keys, and you "invite" your collaborators to the environment.
 
-## The Audit Log
+## Safety
+
+### The audit log
 
 Within the `.epicenv` folder, there is an `auditlog.txt`.
 
 This file contains logs of every operation performed on the environment, so you can follow the history of invitations, variable changes, etc.
 
-These are the same logs written to the console.# EpicEnv
+These are the same logs written to the console.
+
+### Preventing personal variables from being added globally
+
+If you attempt to `epicenv set` on a variable that is marked as personal, that set will update the personal variable instead of adding to the global variables to prevent personal values from being leaked via git.
+
+A warning will be thrown when this occurs.
