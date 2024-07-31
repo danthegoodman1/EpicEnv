@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/samber/lo"
 	"os"
@@ -13,9 +14,11 @@ type (
 		Secrets []EncryptedSecret
 	}
 	EncryptedSecret struct {
-		DecryptedSecret
+		Name string
 		// Value is base64 encoded encrypted bytes
 		Value string `json:",omitempty"`
+		// Personal is whether this should be pulled from the personal_secrets.json file
+		Personal bool
 	}
 	DecryptedSecret struct {
 		Name string
@@ -28,6 +31,12 @@ type (
 
 func readSecretsFile(env string, personal bool) (*SecretsFile, error) {
 	fileBytes, err := os.ReadFile(path.Join(".epicenv", env, lo.Ternary(personal, "personal_secrets.json", "secrets.json")))
+	if personal && errors.Is(err, os.ErrNotExist) {
+		// Create a blank one and return
+		secretsFile := SecretsFile{}
+		return &secretsFile, writeSecretsFile(env, secretsFile, true)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error in os.ReadFile: %w", err)
 	}
@@ -41,8 +50,8 @@ func readSecretsFile(env string, personal bool) (*SecretsFile, error) {
 	return &secretsFile, nil
 }
 
-func writeSecretsFile(env string, keysFile SecretsFile, personal bool) error {
-	fileBytes, err := json.Marshal(keysFile)
+func writeSecretsFile(env string, secretsFile SecretsFile, personal bool) error {
+	fileBytes, err := json.Marshal(secretsFile)
 	if err != nil {
 		return fmt.Errorf("error in json.Marshal: %w", err)
 	}

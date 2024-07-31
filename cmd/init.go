@@ -91,4 +91,6 @@ func runInit(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logger.Fatal().Err(err).Msg("erorr generating activate source")
 	}
+
+	logger.Info().Msgf("Initialized %s", env)
 }

@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
@@ -88,11 +87,11 @@ func encryptWithPublicKey(data []byte, publicKey string) (string, error) {
 	// Convert the SSH public key to a crypto/rsa PublicKey
 	cryptoPub, ok := pub.(ssh.CryptoPublicKey)
 	if !ok {
-		return "", errors.New("SSH key is not an RSA key")
+		return "", fmt.Errorf("SSH key is not an RSA key")
 	}
 	rsaPub, ok := cryptoPub.CryptoPublicKey().(*rsa.PublicKey)
 	if !ok {
-		return "", errors.New("SSH key is not an RSA key")
+		return "", fmt.Errorf("SSH key is not an RSA key")
 	}
 
 	// Encrypt the data
@@ -113,7 +112,7 @@ func decryptWithPrivateKey(encryptedData string, kp keyPair) ([]byte, error) {
 
 	block, _ := pem.Decode(privateKeyBytes)
 	if block == nil {
-		return nil, errors.New("failed to decode PEM block containing private key")
+		return nil, fmt.Errorf("failed to decode PEM block containing private key")
 	}
 
 	var privateKey interface{}
@@ -128,7 +127,7 @@ func decryptWithPrivateKey(encryptedData string, kp keyPair) ([]byte, error) {
 			return nil, err
 		}
 	} else {
-		return nil, errors.New("unsupported private key type")
+		return nil, fmt.Errorf("unsupported private key type")
 	}
 
 	decodedData, err := base64.StdEncoding.DecodeString(encryptedData)
@@ -140,8 +139,8 @@ func decryptWithPrivateKey(encryptedData string, kp keyPair) ([]byte, error) {
 	case *rsa.PrivateKey:
 		return rsa.DecryptPKCS1v15(rand.Reader, key, decodedData)
 	case *ed25519.PrivateKey:
-		return nil, errors.New("decryption with Ed25519 is not supported")
+		return nil, fmt.Errorf("decryption with Ed25519 is not supported")
 	default:
-		return nil, errors.New("unsupported private key type")
+		return nil, fmt.Errorf("unsupported private key type")
 	}
 }
