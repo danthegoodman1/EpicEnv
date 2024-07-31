@@ -11,9 +11,11 @@ import (
 
 // setCmd represents the set command
 var setCmd = &cobra.Command{
-	Use:   "set",
+	Use:   "set KEY VALUE",
 	Short: "Set an environment variable",
 	Long: `Set an environment variable
+
+Use -e to set the environment, can omit to use the current.
 
 Use -p to set a personal variable.
 
@@ -21,6 +23,8 @@ If you attempt to normal set a personal variable, it will update the personal va
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("set called")
 	},
+	Args:       cobra.RangeArgs(2, 3),
+	ArgAliases: []string{"env", "key", "value"},
 }
 
 func init() {

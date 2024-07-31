@@ -25,5 +25,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringP("environment", "e", "", "Specify the environment, will use the current by default if one is set")
 }

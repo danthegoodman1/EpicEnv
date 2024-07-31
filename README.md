@@ -25,7 +25,7 @@ This will create a `.epicenv` directory, and add `.epicenv/personal` to your `.g
 You can add individual variables with:
 
 ```
-epicenv set [KEY] [VALUE]
+epicenv set KEY VALUE -e myenv
 ```
 
 You can run this again to replace values as well.
@@ -35,7 +35,7 @@ _Pro-tip: put a space before typing the command to prevent it from being added t
 You can also import an existing `.env` file with:
 
 ```
-epicenv import [PATH]
+epicenv import PATH
 ```
 
 ### Add personal environment variables
@@ -43,7 +43,7 @@ epicenv import [PATH]
 For something like database or AWS credentials, you'll want to use (and enforce) using local credentials.
 
 ```
-epicenv set [KEY] [VALUE] -p
+epicenv set KEY VALUE -e myenv -p
 ```
 
 This will mark the env var as personal, preventing it from being committed to git.
@@ -71,7 +71,7 @@ Which will re-encrypt all values, removing their access.
 ### Source the environment
 
 ```
-source .epicenv/activate
+source .epicenv/myenv/activate
 ```
 
 Your local shell will decrypt and load the variables into the environment!
@@ -90,7 +90,7 @@ git commit -m "add epicenv"
 You can remove global and personal variables with:
 
 ```
-epicenv rm [KEY]
+epicenv rm KEY -e myenv
 ```
 
 ## Motivation
