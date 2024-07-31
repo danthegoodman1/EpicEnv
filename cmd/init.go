@@ -58,7 +58,7 @@ func runInit(cmd *cobra.Command, args []string) {
 	}
 
 	// append personal secrets to gitignore or create it
-	err = addToGitIgnore()
+	err = prepareGitIgnore()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error creating gitignore")
 	}

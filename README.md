@@ -80,6 +80,14 @@ Your local shell will decrypt and load the variables into the environment!
 
 You can also run this command to update the local environment when changes are pulled from GitHub.
 
+### Deactivate the environment
+
+To unset the env vars (or return them to their previous values), run:
+
+```
+deactivate
+```
+
 ### Commit the `.epicenv` directory
 
 ```
@@ -94,6 +102,7 @@ You can remove global and personal variables with:
 ```
 epicenv rm KEY -e myenv
 ```
+
 
 ## Motivation
 

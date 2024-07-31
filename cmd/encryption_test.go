@@ -36,3 +36,25 @@ func TestEncryptionDecryption(t *testing.T) {
 		t.Errorf("RSA decrypted data does not match original data")
 	}
 }
+
+func TestEncryptDecryptAESGCM(t *testing.T) {
+	key := generateAESKey()
+	plaintext := "Hello, World!"
+
+	// Encrypt the plaintext
+	ciphertextBase64, err := encryptAESGCM(key, plaintext)
+	if err != nil {
+		t.Fatalf("encryption failed: %v", err)
+	}
+
+	// Decrypt the ciphertext
+	decryptedText, err := decryptAESGCM(key, ciphertextBase64)
+	if err != nil {
+		t.Fatalf("decryption failed: %v", err)
+	}
+
+	// Verify the result
+	if decryptedText != plaintext {
+		t.Errorf("decryption result mismatch: got %q, want %q", decryptedText, plaintext)
+	}
+}

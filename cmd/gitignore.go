@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func addToGitIgnore() error {
+func prepareGitIgnore() error {
 	if _, err := os.Stat(".gitignore"); errors.Is(err, os.ErrNotExist) {
 		// create the file
 		logger.Debug().Msg("creating .gitignore")
@@ -29,24 +29,25 @@ func addToGitIgnore() error {
 		return fmt.Errorf("error in os.ReadFile: %w", err)
 	}
 
-	// Add lines
-	f, err := os.OpenFile(".gitignore", os.O_WRONLY, 0777)
-	if err != nil {
-		return fmt.Errorf("error in os.Open: %w", err)
-	}
-	defer f.Close()
+	fileString := string(fileContent)
 
-	if !strings.Contains(string(fileContent), ".epicenv/*/personal_keys.json") {
-		_, err = f.WriteString(fmt.Sprintf("\n%s\n", ".epicenv/*/personal_keys.json"))
-		if err != nil {
-			return fmt.Errorf("error in WriteString: %w", err)
-		}
+	fmt.Println(fileString)
+
+	ignoreStat, err := os.Stat(".gitignore")
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error getting stats on .gitignore")
 	}
-	if !strings.Contains(string(fileContent), ".epicenv/temp") {
-		_, err = f.WriteString(fmt.Sprintf("\n%s\n", ".epicenv/*/personal_keys.json"))
-		if err != nil {
-			return fmt.Errorf("error in WriteString: %w", err)
-		}
+
+	if !strings.Contains(fileString, ".epicenv/*/personal_keys.json") {
+		fileString += "\n.epicenv/*/personal_keys.json\n"
+	}
+	if !strings.Contains(fileString, ".epicenv/temp*") {
+		fileString += "\n.epicenv/temp*\n"
+	}
+
+	err = os.WriteFile(".gitignore", []byte(fileString), ignoreStat.Mode())
+	if err != nil {
+		return fmt.Errorf("error in WriteFile for .gitignore: %w", err)
 	}
 
 	return nil
