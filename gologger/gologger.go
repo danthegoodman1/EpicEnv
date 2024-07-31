@@ -52,7 +52,7 @@ func LvlForErr(err error) zerolog.Level {
 
 func NewLogger() zerolog.Logger {
 	zerolog.TimeFieldFormat = ""
-	if os.Getenv("DEBUG") != "" {
+	if os.Getenv("DEBUG") != "" || os.Getenv("EPICENV_DEV") != "" {
 		zerolog.TimeFieldFormat = time.RFC3339Nano
 		zerolog.TimestampFieldName = "time"
 	}
@@ -66,7 +66,7 @@ func NewLogger() zerolog.Logger {
 	logger = logger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	if os.Getenv("TRACE") == "1" {
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
-	} else if os.Getenv("DEBUG") == "1" {
+	} else if os.Getenv("DEBUG") != "" || os.Getenv("EPICENV_DEV") != "" {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
