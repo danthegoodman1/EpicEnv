@@ -1,3 +1,5 @@
 .idea
 .epicenv/*/personal_keys.json
 .epicenv
+
+.epicenv/temp*

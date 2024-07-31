@@ -31,8 +31,6 @@ func prepareGitIgnore() error {
 
 	fileString := string(fileContent)
 
-	fmt.Println(fileString)
-
 	ignoreStat, err := os.Stat(".gitignore")
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error getting stats on .gitignore")
