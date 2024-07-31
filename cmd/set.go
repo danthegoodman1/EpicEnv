@@ -99,11 +99,6 @@ func runSet(cmd *cobra.Command, args []string) {
 			Value:    encrypted,
 		})
 
-		err = writeSecretsFile(env, *secretsFile, personal)
-		if err != nil {
-			logger.Fatal().Err(err).Msg("error writing secrets file")
-		}
-
 		if personal {
 			// We need to mark it in the shared secrets that it exists now
 			sharedSecrets, err := readSecretsFile(env, false)
@@ -126,5 +121,14 @@ func runSet(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	err = writeSecretsFile(env, *secretsFile, personal)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error writing secrets file")
+	}
+
 	logger.Info().Msgf("Updated %s", key)
+
+	if os.Getenv("EPICENV") != "" {
+		logger.Info().Msgf("To reload the current environment, run:\n\tsource .epicenv/%s/activate", env)
+	}
 }

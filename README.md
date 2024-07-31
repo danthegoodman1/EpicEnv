@@ -82,11 +82,13 @@ You can also run this command to update the local environment when changes are p
 
 ### Deactivate the environment
 
-To unset the env vars (or return them to their previous values), run:
+You can deactivate the environment, which will return environment variables to their previous state (previous value or unset).
 
 ```
 deactivate
 ```
+
+If you are already in an environment, deactivate will automatically be run when you switch or refresh.
 
 ### Commit the `.epicenv` directory
 

@@ -8,11 +8,21 @@ import (
 )
 
 func generateActivateSource(env string) error {
-	activateContent := `temp_src=$(%s zzz_INTERNAL_gen -e %s)
+	activateContent := `if [ -z "${EPICENV}" ]; then
+    # do nothing
+else
+    echo deactivating $EPICENV
+    deactivate
+fi
+temp_src=$(%s zzz_INTERNAL_gen -e %s)
 if [ $? -lt 1 ]; then
-	echo activated env %s
+	echo activated env default
     source $temp_src
-    rm $temp_src
+    if [ -z "${DEV}" ]; then
+        rm $temp_src
+    else
+        echo leaving temp file $temp_src for debug
+    fi
 fi
 `
 

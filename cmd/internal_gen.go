@@ -50,7 +50,7 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 	}
 
 	// Set the secret env var for introspection
-	sourceFile += fmt.Sprintf("EPICENV=\"%s\"\n", env)
+	sourceFile += fmt.Sprintf("export EPICENV=\"%s\"\n", env)
 	undoLines = append(undoLines, "unset EPICENV")
 
 	// We allow for nested prefixes so they user knows how they environments are stacked
