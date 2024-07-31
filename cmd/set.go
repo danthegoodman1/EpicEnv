@@ -51,8 +51,6 @@ func runSet(cmd *cobra.Command, args []string) {
 	// Check if we are setting a personal env var
 	personal := cmd.Flag("personal").Value.String() == "true"
 
-	fmt.Printf("%+v\n", envMap)
-
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
 		logger.Fatal().Msg("Attempting to set an existing shared env var as personal, please rm this env var and set again")
 	}

@@ -3,13 +3,12 @@ package gologger
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/rs/zerolog"
 )
 
 type ctxKey string
@@ -52,16 +51,13 @@ func LvlForErr(err error) zerolog.Level {
 }
 
 func NewLogger() zerolog.Logger {
-	if os.Getenv("LOG_TIME_MS") == "1" {
-		// Log with milliseconds
-		zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
-	} else {
+	zerolog.TimeFieldFormat = ""
+	if os.Getenv("DEBUG") != "" {
 		zerolog.TimeFieldFormat = time.RFC3339Nano
+		zerolog.TimestampFieldName = "time"
 	}
 
 	zerolog.LevelFieldName = GetEnvOrDefault("LOG_LEVEL_KEY", "level")
-
-	zerolog.TimestampFieldName = "time"
 
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 
@@ -82,5 +78,7 @@ func NewLogger() zerolog.Logger {
 type CallerHook struct{}
 
 func (h CallerHook) Run(e *zerolog.Event, _ zerolog.Level, _ string) {
-	e.Caller(3)
+	if os.Getenv("DEBUG") != "" {
+		e.Caller(3)
+	}
 }
