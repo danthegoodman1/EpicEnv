@@ -29,20 +29,24 @@ func addToGitIgnore() error {
 		return fmt.Errorf("error in os.ReadFile: %w", err)
 	}
 
-	if strings.Contains(string(fileContent), ".epicenv/*/personal_keys.json") {
-		logger.Debug().Msg("\".epicenv/*/personal_keys.json\" already in .gitignore, continuing")
-		return nil
-	}
-
-	// Add personal keys
+	// Add lines
 	f, err := os.OpenFile(".gitignore", os.O_WRONLY, 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.Open: %w", err)
 	}
 	defer f.Close()
-	_, err = f.WriteString(fmt.Sprintf("\n%s\n", ".epicenv/*/personal_keys.json"))
-	if err != nil {
-		return fmt.Errorf("error in WriteString: %w", err)
+
+	if !strings.Contains(string(fileContent), ".epicenv/*/personal_keys.json") {
+		_, err = f.WriteString(fmt.Sprintf("\n%s\n", ".epicenv/*/personal_keys.json"))
+		if err != nil {
+			return fmt.Errorf("error in WriteString: %w", err)
+		}
+	}
+	if !strings.Contains(string(fileContent), ".epicenv/temp") {
+		_, err = f.WriteString(fmt.Sprintf("\n%s\n", ".epicenv/*/personal_keys.json"))
+		if err != nil {
+			return fmt.Errorf("error in WriteString: %w", err)
+		}
 	}
 
 	return nil

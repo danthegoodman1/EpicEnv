@@ -87,7 +87,8 @@ func runInit(cmd *cobra.Command, args []string) {
 		logger.Fatal().Err(err).Msg("error writing keys file")
 	}
 
-	// TODO: Record invited github user to audit log
-
-	// todo create source script
+	err = generateActivateSource(env)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("erorr generating activate source")
+	}
 }

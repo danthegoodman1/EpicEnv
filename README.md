@@ -113,14 +113,6 @@ Environment variables are encrypted using your `github.com/{username}.keys` keys
 
 ## Safety
 
-### The audit log
-
-Within the `.epicenv` folder, there is an `auditlog.txt`.
-
-This file contains logs of every operation performed on the environment, so you can follow the history of invitations, variable changes, etc.
-
-These are the same logs written to the console.
-
 ### Preventing personal variables from being added globally
 
 If you attempt to `epicenv set` on a variable that is marked as personal, that set will update the personal variable instead of adding to the global variables to prevent personal values from being leaked via git.
