@@ -17,11 +17,18 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-func findFirstPrivateKeyForPublicKeys(pubKeys []string) (string, error) {
+type keyPair struct {
+	publicKeyContent string
+	privateKeyPath   string
+}
+
+func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
 	files, err := os.ReadDir(path.Join(os.Getenv("HOME"), ".ssh"))
 	if err != nil {
-		return "", fmt.Errorf("error in ReadDir: %w", err)
+		return nil
 	}
+
+	var keys []keyPair
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -31,7 +38,7 @@ func findFirstPrivateKeyForPublicKeys(pubKeys []string) (string, error) {
 		// Find a file that shares content with the pub keys
 		fileContent, err := os.ReadFile(path.Join(os.Getenv("HOME"), ".ssh", file.Name()))
 		if err != nil {
-			return "", fmt.Errorf("error in os.ReadFile of %s: %w", file.Name(), err)
+			return nil
 		}
 
 		logger.Debug().Msgf("Checking file %s", file.Name())
@@ -50,13 +57,16 @@ func findFirstPrivateKeyForPublicKeys(pubKeys []string) (string, error) {
 		// pop the .pub
 		privateKeyFile := strings.Split(file.Name(), ".pub")[0]
 		if privateKeyFile == file.Name() {
-			return "", fmt.Errorf("private key file was same as public key, or rather {key_file}.pub did not have a matching {key_file} file")
+			return nil
 		}
 
-		return path.Join(os.Getenv("HOME"), ".ssh", privateKeyFile), nil
+		keys = append(keys, keyPair{
+			publicKeyContent: keyContent,
+			privateKeyPath:   path.Join(os.Getenv("HOME"), ".ssh", privateKeyFile),
+		})
 	}
 
-	return "", ErrNotFound
+	return keys
 }
 
 func getKeysForGithubUsername(username string) ([]string, error) {
@@ -73,13 +83,24 @@ func getKeysForGithubUsername(username string) ([]string, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode == 404 {
+		return nil, ErrNotFound
+	}
+
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error in io.ReadAll(res.Body): %w", err)
 	}
 
+	if res.StatusCode >= 299 {
+		return nil, fmt.Errorf("high status code: %d %s", err, string(bodyBytes))
+	}
+
 	keys := lo.Map(strings.Split(string(bodyBytes), "\n"), func(item string, index int) string {
 		return strings.TrimSpace(item)
+	})
+	keys = lo.Filter(keys, func(item string, index int) bool {
+		return item != "" && strings.HasPrefix(item, "ssh-rsa")
 	})
 
 	return keys, nil

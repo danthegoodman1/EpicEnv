@@ -5,9 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"golang.org/x/term"
-	"syscall"
-
 	"github.com/spf13/cobra"
 )
 
@@ -46,14 +43,4 @@ func runSet(cmd *cobra.Command, args []string) {
 
 	// TODO: Record in audit log
 	fmt.Println(key, val)
-}
-
-func readStdinHidden(prompt string) string {
-	fmt.Print(prompt)
-	bytePassword, err := term.ReadPassword(syscall.Stdin)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println() // Move to the next line after input
-	return string(bytePassword)
 }

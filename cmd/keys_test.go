@@ -23,10 +23,10 @@ func TestFindFirstPrivateKeyForPublicKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	privKeyName, err := findFirstPrivateKeyForPublicKeys(pubKeys)
-	if err != nil {
-		t.Fatal(err)
+	keyPairs := findPrivateKeysForPublicKeys(pubKeys)
+	if len(keyPairs) == 0 {
+		t.Fatal("did not find any keys")
 	}
 
-	t.Log("found private key:", privKeyName)
+	t.Log("found private key:", keyPairs)
 }

@@ -54,7 +54,7 @@ If someone sources the environment in the future without setting their own perso
 
 ### Invite collaborators
 
-Collaborators are invited via their GitHub usernames.  They must have at least 1 key added to their account, which can be checked at `github.com/{username}.keys`.
+Collaborators are invited via their GitHub usernames.  They must have at least 1 RSA key added to their account, which can be checked at `github.com/{username}.keys`.
 
 ```
 epicenv invite danthegoodman1
