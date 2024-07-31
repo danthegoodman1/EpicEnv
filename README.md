@@ -32,7 +32,7 @@ epicenv set KEY VALUE -e myenv
 
 You can run this again to replace values as well.
 
-_Pro-tip: put a space before typing the command to prevent it from being added to your shell history (thus preventing leaks)_
+_Pro-tip: put a space before typing the command to prevent it from being added to your shell history (thus preventing leaks). You can also use `-i` to have the command prompt for the input from stdin_
 
 You can also import an existing `.env` file with:
 

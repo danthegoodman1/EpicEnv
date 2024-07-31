@@ -31,4 +31,5 @@ func init() {
 	rootCmd.AddCommand(setCmd)
 
 	setCmd.Flags().BoolP("personal", "p", false, "Set this as a personal environment if it doesn't exist")
+	setCmd.Flags().BoolP("stdin", "i", false, "Read the value from stdin instead")
 }
