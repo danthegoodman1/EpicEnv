@@ -18,7 +18,9 @@ Within your project directory, run:
 epicenv init
 ```
 
-This will create a `.epicenv` directory, and add `.epicenv/personal` to your `.gitignore`.
+This will create an EpicEnv `environment`. You can use different environments to link your local environment to different infrastructure, such as staging and production.
+
+This will create a `.epicenv` directory, and add `.epicenv/*/personal` to your `.gitignore`.
 
 ### Add shared environment variables
 
