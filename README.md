@@ -18,6 +18,7 @@ All of your environments encrypted and managed in git, with basic permissions vi
     * [Remove variables](#remove-variables)
   * [Motivation](#motivation)
   * [Safety](#safety)
+    * [Encryption](#encryption)
     * [Preventing personal variables from being added globally](#preventing-personal-variables-from-being-added-globally)
     * [Rotating keys](#rotating-keys)
 <!-- TOC -->
@@ -147,6 +148,10 @@ Everything in git is encrypted and nobody has to manage local `.env` files or pr
 This is also great for streamers, as they never have to worry about accidentally opening a .env file and spilling their production secrets to viewers >.<.
 
 ## Safety
+
+### Encryption
+
+Variables are encrypted with AES GCM mode, the symmetric key is encrypted with the RSA keys from each collaborator.
 
 ### Preventing personal variables from being added globally
 
