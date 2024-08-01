@@ -1,6 +1,8 @@
 # EpicEnv
 
-An epic environment manager
+An epic environment manager to fix local environment variable management among git collaborators.
+
+All of your environments encrypted and managed in git, with basic permissions via an invitation system.
 
 <!-- TOC -->
 * [EpicEnv](#epicenv)
