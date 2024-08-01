@@ -7,7 +7,7 @@ An epic environment manager
 ### Install EpicEnv
 
 ```
-go install github.com/epicenv@latest
+go install github.com/danthegoodman1/epicenv@latest
 ```
 
 ### Initialize EpicEnv
