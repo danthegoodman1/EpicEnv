@@ -2,6 +2,24 @@
 
 An epic environment manager
 
+<!-- TOC -->
+* [EpicEnv](#epicenv)
+  * [Quick Start](#quick-start)
+    * [Install EpicEnv](#install-epicenv)
+    * [Initialize EpicEnv](#initialize-epicenv)
+    * [Add shared environment variables](#add-shared-environment-variables)
+    * [Add personal environment variables](#add-personal-environment-variables)
+    * [Invite collaborators](#invite-collaborators)
+    * [Source the environment](#source-the-environment)
+    * [Deactivate the environment](#deactivate-the-environment)
+    * [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
+    * [Remove variables](#remove-variables)
+  * [Motivation](#motivation)
+  * [Safety](#safety)
+    * [Preventing personal variables from being added globally](#preventing-personal-variables-from-being-added-globally)
+    * [Rotating keys](#rotating-keys)
+<!-- TOC -->
+
 ## Quick Start
 
 ### Install EpicEnv
