@@ -134,11 +134,15 @@ Considering each developer has (or at least should have) their own specific envi
 
 This spirals out of control until eventually everyone is fighting over the staging deployment as their dev environment, and nobody has run the service locally in 8 months.
 
-EpicEnv fixes this.
+EpicEnv aims to fix this.
 
-EpicEnv creates encrypted environment variables for you local environment, sharing what can be, and replacing developer-specific values where required.
+EpicEnv stores your environments encrypted in git, and decrypts them when you activate the environment. You can share variables that can be, and replace developer-specific ("personal") variables where required (e.g. DB or AWS credentials).
 
-Environment variables are encrypted using your `github.com/{username}.keys` keys, and you "invite" your collaborators to the environment.
+Environment variables are encrypted using RSA keys found in your `github.com/{username}.keys`, and you "invite" your collaborators to the environment.
+
+Everything in git is encrypted and nobody has to manage local `.env` files or prevent them from being committed.
+
+This is also great for streamers, as they never have to worry about accidentally opening a .env file and spilling their production secrets to viewers >.<.
 
 ## Safety
 
