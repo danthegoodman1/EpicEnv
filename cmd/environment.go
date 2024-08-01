@@ -6,6 +6,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
 
 // getEnvOrFlag will attempt to read the flag, then environment, then print a message and exit
@@ -93,6 +94,14 @@ func loadEnv(env string) map[string]loadedEnvVar {
 				Personal: true,
 			}
 		}
+	}
+
+	// Find any that we didn't fill in from personal secrets and warn
+	missingPersonal := lo.PickBy(envMap, func(key string, value loadedEnvVar) bool {
+		return value.Personal && value.Value == ""
+	})
+	if len(missingPersonal) > 0 {
+		logger.Warn().Msgf("Missing personal values: %s", strings.Join(lo.Keys(missingPersonal), ", "))
 	}
 
 	return envMap
