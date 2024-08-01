@@ -68,7 +68,7 @@ epicenv uninvite danthegoodman1
 
 Which will re-encrypt all values, removing their access.
 
-**Note that if they do not pull, or do not re-source, then the values are accessible by them. This is not a replacement for rotating secrets!**
+**Note you still need to rotate your secrets if someone leaves your team!**
 
 ### Source the environment
 
@@ -131,3 +131,7 @@ If you attempt to `epicenv set` on a variable that is marked as personal, that s
 A warning will be thrown when this occurs.
 
 To make a personal variable shared, first `rm` the personal variable, then set it again as shared. Vice-versa for making a shared variable personal.
+
+### Rotating keys
+
+We explicitly DO NOT change the symmetric key for decryption of environment variables to FORCE YOU TO ROTATE KEYS IF SOMEONE LEAVES YOUR TEAM!!!!!!!!!!
