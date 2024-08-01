@@ -46,10 +46,22 @@ func runSet(cmd *cobra.Command, args []string) {
 
 	env := getEnvOrFlag(cmd)
 
-	envMap := loadEnv(env)
+	setEnvVar(cmd, env, key, val)
 
+	logger.Info().Msgf("Updated %s", key)
+
+	if os.Getenv("EPICENV") != "" {
+		logger.Info().Msgf("To reload the current environment, run:\n\tsource .epicenv/%s/activate", env)
+	}
+}
+
+func setEnvVar(cmd *cobra.Command, env, key, val string) {
+	envMap := loadEnv(env)
 	// Check if we are setting a personal env var
-	personal := cmd.Flag("personal").Value.String() == "true"
+	personal := false
+	if cmd.Flag("personal") != nil {
+		personal = cmd.Flag("personal").Value.String() == "true"
+	}
 
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
 		logger.Fatal().Msg("Attempting to set an existing shared env var as personal, please rm this env var and set again")
@@ -124,11 +136,5 @@ func runSet(cmd *cobra.Command, args []string) {
 	err = writeSecretsFile(env, *secretsFile, personal)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error writing secrets file")
-	}
-
-	logger.Info().Msgf("Updated %s", key)
-
-	if os.Getenv("EPICENV") != "" {
-		logger.Info().Msgf("To reload the current environment, run:\n\tsource .epicenv/%s/activate", env)
 	}
 }

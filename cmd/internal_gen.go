@@ -38,10 +38,10 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 	var undoLines []string // so we can deactivate the env
 	sourceFile := "OLDPS1=$PS1\n"
 	for key, loaded := range envMap {
-		sourceFile += fmt.Sprintf("export %s=\"%s\"\n", key, loaded.Value)
+		sourceFile += fmt.Sprintf("export %s=%s\n", key, wrapQuotesIfNeeded(loaded.Value))
 		// Check if the env already exists and make a replacement set
 		if oldVal, exists := existingEnvMap[key]; exists {
-			undoLines = append(undoLines, fmt.Sprintf("export %s=\"%s\"\n", key, oldVal))
+			undoLines = append(undoLines, fmt.Sprintf("export %s=%s\n", key, wrapQuotesIfNeeded(oldVal)))
 			continue
 		}
 
@@ -68,4 +68,12 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(tempSourcePath)
+}
+
+func wrapQuotesIfNeeded(s string) string {
+	if strings.Contains(s, " ") && s[0:1] != "\"" && s[len(s)-1:] != "\"" {
+		return "\"" + s + "\""
+	}
+
+	return s
 }
