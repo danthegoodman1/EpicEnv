@@ -4,6 +4,8 @@ An epic environment manager to fix local environment variable management among g
 
 All of your environments encrypted and managed in git, with basic permissions via an invitation system.
 
+_Currently only supports macOS and Linux_
+
 <!-- TOC -->
 * [EpicEnv](#epicenv)
   * [Quick Start](#quick-start)
