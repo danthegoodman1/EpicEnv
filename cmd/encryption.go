@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
-	"io/ioutil"
+	"os"
 )
 
 func generateAESKey() []byte {
@@ -105,7 +105,7 @@ func encryptWithPublicKey(data []byte, publicKey string) (string, error) {
 
 // decryptWithPrivateKey decrypts data using the private key in the keyPair.
 func decryptWithPrivateKey(encryptedData string, kp keyPair) ([]byte, error) {
-	privateKeyBytes, err := ioutil.ReadFile(kp.privateKeyPath)
+	privateKeyBytes, err := os.ReadFile(kp.privateKeyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -143,4 +143,21 @@ func decryptWithPrivateKey(encryptedData string, kp keyPair) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unsupported private key type")
 	}
+}
+
+func convertEd25519ToX25519(ed25519PubKey ed25519.PublicKey) ([32]byte, error) {
+	var x25519PubKey [32]byte
+
+	// Verify the key length
+	if len(ed25519PubKey) != ed25519.PublicKeySize {
+		return x25519PubKey, fmt.Errorf("invalid Ed25519 public key size")
+	}
+
+	// The conversion is simply copying the key, as the underlying curve is the same
+	copy(x25519PubKey[:], ed25519PubKey)
+
+	// Clear the top bit
+	x25519PubKey[31] &= 0x7F
+
+	return x25519PubKey, nil
 }
