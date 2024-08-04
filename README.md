@@ -2,6 +2,8 @@
 
 An epic environment manager to fix local environment variable management among git collaborators.
 
+It's like python virtual envs, but for environment variables.
+
 All of your environments encrypted and managed in git, with basic permissions via an invitation system.
 
 _Currently only supports macOS and Linux_
