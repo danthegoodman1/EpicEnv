@@ -75,7 +75,7 @@ epicenv set KEY VALUE -e myenv -p
 
 This will mark the env var as personal, preventing it from being committed to git.
 
-If someone sources the environment in the future without setting their own personal value, they will see a warning in the console notifying them that they are missing part of the environment.
+If someone sources the environment in the future without setting their own personal value, they will see a warning in the console notifying them that they are missing part of the environment. If they attempt to write a personal env var as a shared env var, EpicEnv will recognize this and assume they meant personal, while throwing a warning (see safety section for more).
 
 ### Invite collaborators
 
