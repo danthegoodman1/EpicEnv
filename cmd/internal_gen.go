@@ -71,7 +71,7 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 }
 
 func wrapQuotesIfNeeded(s string) string {
-	if strings.Contains(s, " ") && s[0:1] != "\"" && s[len(s)-1:] != "\"" {
+	if strings.Contains(s, " ") || strings.Contains(s, "/") && s[0:1] != "\"" && s[len(s)-1:] != "\"" {
 		return "\"" + s + "\""
 	}
 

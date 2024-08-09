@@ -78,7 +78,7 @@ func NewLogger() zerolog.Logger {
 type CallerHook struct{}
 
 func (h CallerHook) Run(e *zerolog.Event, _ zerolog.Level, _ string) {
-	if os.Getenv("DEBUG") != "" {
+	if os.Getenv("DEBUG") != "" || os.Getenv("EPICENV_DEV") != "" {
 		e.Caller(3)
 	}
 }

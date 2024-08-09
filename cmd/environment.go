@@ -25,11 +25,12 @@ func getEnvOrFlag(cmd *cobra.Command) string {
 }
 
 type loadedEnvVar struct {
-	Value    string
-	Personal bool
+	Value       string
+	Personal    bool
+	Integration Integration
 }
 
-// loadEnv will short circuit fatal exit if it has an unrecoverable error
+// loadEnv will short circuit fatal exit if it has an unrecoverable error, and also load through any integrations as needed
 func loadEnv(env string) map[string]loadedEnvVar {
 	symKey, err := loadSymmetricKey(env)
 
@@ -44,9 +45,10 @@ func loadEnv(env string) map[string]loadedEnvVar {
 
 	envVars := lo.Map(secretsFile.Secrets, func(item EncryptedSecret, index int) DecryptedSecret {
 		envVar := DecryptedSecret{
-			Name:     item.Name,
-			Value:    "",
-			Personal: item.Personal,
+			Name:        item.Name,
+			Value:       "",
+			Personal:    item.Personal,
+			Integration: item.Integration,
 		}
 		if !item.Personal {
 			envVar.Value, err = decryptAESGCM(symKey, item.Value)
@@ -59,8 +61,9 @@ func loadEnv(env string) map[string]loadedEnvVar {
 
 	envMap := lo.Associate(envVars, func(item DecryptedSecret) (string, loadedEnvVar) {
 		return item.Name, loadedEnvVar{
-			Value:    item.Value,
-			Personal: item.Personal,
+			Value:       item.Value,
+			Personal:    item.Personal,
+			Integration: item.Integration,
 		}
 	})
 
@@ -77,9 +80,10 @@ func loadEnv(env string) map[string]loadedEnvVar {
 
 		personalEnvVars := lo.Map(secretsFile.Secrets, func(item EncryptedSecret, index int) DecryptedSecret {
 			envVar := DecryptedSecret{
-				Name:     item.Name,
-				Value:    "",
-				Personal: false,
+				Name:        item.Name,
+				Value:       "",
+				Personal:    false,
+				Integration: item.Integration,
 			}
 			envVar.Value, err = decryptAESGCM(symKey, item.Value)
 			if err != nil {
@@ -90,8 +94,9 @@ func loadEnv(env string) map[string]loadedEnvVar {
 
 		for _, personalVar := range personalEnvVars {
 			envMap[personalVar.Name] = loadedEnvVar{
-				Value:    personalVar.Value,
-				Personal: true,
+				Value:       personalVar.Value,
+				Personal:    true,
+				Integration: personalVar.Integration,
 			}
 		}
 	}
@@ -102,6 +107,20 @@ func loadEnv(env string) map[string]loadedEnvVar {
 	})
 	if len(missingPersonal) > 0 {
 		logger.Warn().Msgf("Missing personal values: %s", strings.Join(lo.Keys(missingPersonal), ", "))
+	}
+
+	// look up integration
+	for key, val := range envMap {
+		if val.Integration != "" {
+			logger.Info().Msg("Using enterprise integrations. If you are using this as part of work, make sure you acquire an enterprise license: https://github.com/danthegoodman1/EpicEnv/blob/main/LICENSE")
+			switch val.Integration {
+			case Integration1Password:
+				val.Value = Load1PasswordSecret(env, val.Value)
+				envMap[key] = val
+			default:
+				logger.Fatal().Msgf("Unknown integration \"%s\".\nMake sure you have the most up to date version of EpicEnv.\nIf you believe this is a bug, please report!", val.Integration)
+			}
+		}
 	}
 
 	return envMap
