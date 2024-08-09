@@ -42,6 +42,9 @@ func prepareGitIgnore() error {
 	if !strings.Contains(fileString, ".epicenv/temp*") {
 		fileString += "\n.epicenv/temp*\n"
 	}
+	if !strings.Contains(fileString, ".epicenv/*/integration*.json") {
+		fileString += "\n.epicenv/*/integration*.json\n"
+	}
 
 	err = os.WriteFile(".gitignore", []byte(fileString), ignoreStat.Mode())
 	if err != nil {

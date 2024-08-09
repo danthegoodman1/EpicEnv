@@ -16,6 +16,10 @@ var (
 	logger = gologger.NewLogger()
 )
 
+const (
+	Version = "0.2.0"
+)
+
 func readStdinHidden(prompt string) string {
 	fmt.Print(prompt)
 	bytePassword, err := term.ReadPassword(syscall.Stdin)

@@ -33,6 +33,7 @@ func init() {
 	rootCmd.AddCommand(setCmd)
 
 	setCmd.Flags().BoolP("personal", "p", false, "Set this as a personal environment if it doesn't exist")
+	setCmd.Flags().StringP("integration", "i", "", "Use an integration like 1Password. See the docs for how to use different integrations.")
 }
 
 func runSet(cmd *cobra.Command, args []string) {
@@ -61,6 +62,14 @@ func setEnvVar(cmd *cobra.Command, env, key, val string) {
 	personal := false
 	if cmd.Flag("personal") != nil {
 		personal = cmd.Flag("personal").Value.String() == "true"
+	}
+	integration := Integration("")
+	if cmd.Flag("integration") != nil {
+		integration = Integration(cmd.Flag("integration").Value.String())
+		// Verify the integration
+		if integration != "" && !lo.Contains(knownIntegrations, integration) {
+			logger.Fatal().Msgf("unknown integration \"%s\", please see the docs", integration)
+		}
 	}
 
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
@@ -101,14 +110,19 @@ func setEnvVar(cmd *cobra.Command, env, key, val string) {
 			logger.Fatal().Msg("unable to find secret again... this is a bug, please report")
 		}
 
+		if secretsFile.Secrets[idx].Integration != integration {
+			logger.Fatal().Msgf("Mismatched integrations, please use the -i/--integration flag to update the variable.\nIf you are trying to change integrations (e.g. change 1password to local), then run:\n\n  epicenv rm %s\n\nTo remove this variable and run this command again", key)
+		}
+
 		secretsFile.Secrets[idx].Value = encrypted
 	} else {
 		logger.Debug().Msgf("Var %s does not exist", key)
 		// Append the value
 		secretsFile.Secrets = append(secretsFile.Secrets, EncryptedSecret{
-			Name:     key,
-			Personal: personal,
-			Value:    encrypted,
+			Name:        key,
+			Personal:    personal,
+			Value:       encrypted,
+			Integration: integration,
 		})
 
 		if personal {
@@ -121,9 +135,10 @@ func setEnvVar(cmd *cobra.Command, env, key, val string) {
 			}
 
 			sharedSecrets.Secrets = append(sharedSecrets.Secrets, EncryptedSecret{
-				Name:     key,
-				Personal: true,
-				Value:    "",
+				Name:        key,
+				Personal:    true,
+				Value:       "",
+				Integration: integration,
 			})
 
 			err = writeSecretsFile(env, *sharedSecrets, false)

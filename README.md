@@ -21,6 +21,7 @@ _Currently only supports macOS and Linux_
     * [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
     * [Remove variables](#remove-variables)
   * [Motivation](#motivation)
+  * [1Password integration (enterprise only)](#1password-integration-enterprise-only)
   * [Safety](#safety)
     * [Encryption](#encryption)
     * [Preventing personal variables from being added globally](#preventing-personal-variables-from-being-added-globally)
@@ -154,6 +155,14 @@ Everything in git is encrypted and nobody has to manage local `.env` files or pr
 This is also great for streamers, as they never have to worry about accidentally opening a `.env` file and spilling their production secrets to viewers >.<
 
 In fact the ability to be able to stream [Tangia](https://www.tangia.co) development was the inception of this idea, as I (used to) happen to have very sensitive environment variables decrypted in my local `.env` file 😬
+
+## 1Password integration (enterprise only)
+
+You can set the secret value to the [1Password Secret Reference](https://developer.1password.com/docs/cli/secret-reference-syntax/) while using the `1password` integration:
+
+```
+epicenv set hey op://i3blj2nqdi42kue4shgstsqnyy/i3oue2gnhqyakzo7rbrfw4nmkm/username -i 1password
+```
 
 ## Safety
 

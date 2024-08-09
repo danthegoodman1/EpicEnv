@@ -23,7 +23,9 @@ type (
 )
 
 func readKeysFile(env string) (*KeysFile, error) {
-	fileBytes, err := os.ReadFile(path.Join(".epicenv", env, "keys.json"))
+	keysPath := path.Join(".epicenv", env, "keys.json")
+	logger.Debug().Msgf("reading keys from %s", keysPath)
+	fileBytes, err := os.ReadFile(keysPath)
 	if err != nil {
 		return nil, fmt.Errorf("error in os.ReadFile: %w", err)
 	}
@@ -38,6 +40,11 @@ func readKeysFile(env string) (*KeysFile, error) {
 }
 
 func writeKeysFile(env string, keysFile KeysFile) error {
+	// Verify we are in the right directory
+	if !envExists(env) {
+		logger.Fatal().Msgf("Environment %s not found, make sure there is a .epicenv directory in this directory", env)
+	}
+
 	fileBytes, err := json.Marshal(keysFile)
 	if err != nil {
 		return fmt.Errorf("error in json.Marshal: %w", err)
