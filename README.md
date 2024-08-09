@@ -151,7 +151,9 @@ Environment variables are encrypted using RSA keys found in your `github.com/{us
 
 Everything in git is encrypted and nobody has to manage local `.env` files or prevent them from being committed.
 
-This is also great for streamers, as they never have to worry about accidentally opening a .env file and spilling their production secrets to viewers >.<.
+This is also great for streamers, as they never have to worry about accidentally opening a .env file and spilling their production secrets to viewers >.<
+
+In fact the ability to be able to stream [Tangia](https://www.tangia.co) development was the inception of this idea, as I (used to) happen to have very sensitive environment variables decrypted in my local `.env` file 😬
 
 ## Safety
 
