@@ -72,7 +72,7 @@ func Load1PasswordSecret(env, secretReference string) string {
 	if err != nil {
 		err = fmt.Errorf("error in Read1PasswordServiceAccount: %w", err)
 		logger.Error().Err(err).Msg("error loading 1Password secret, failing through (env var will be error msg)")
-		return err.Error()
+		return "ERROR see terminal output"
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
