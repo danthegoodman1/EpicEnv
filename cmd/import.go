@@ -44,7 +44,13 @@ func runImport(cmd *cobra.Command, args []string) {
 	logger.Debug().Interface("loadedEnvVars", lo.Keys(loadedEnvMap)).Msg("loaded env map")
 
 	for key, val := range loadedEnvMap {
-		setEnvVar(cmd, env, key, val)
+		personal := false
+		if strings.HasSuffix(val, "#personal") {
+			logger.Info().Msgf("importing \"%s\" as personal", key)
+			personal = true
+			val = strings.TrimSpace(strings.Split(val, "#personal")[0])
+		}
+		setEnvVar(env, key, val, personal)
 	}
 
 	logger.Info().Msgf("Imported %d variables from %s", len(loadedEnvMap), envPath)

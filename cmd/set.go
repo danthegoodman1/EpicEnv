@@ -46,7 +46,11 @@ func runSet(cmd *cobra.Command, args []string) {
 
 	env := getEnvOrFlag(cmd)
 
-	setEnvVar(cmd, env, key, val)
+	personal := false
+	if cmd.Flag("personal") != nil {
+		personal = cmd.Flag("personal").Value.String() == "true"
+	}
+	setEnvVar(env, key, val, personal)
 
 	logger.Info().Msgf("Updated %s", key)
 
@@ -55,16 +59,12 @@ func runSet(cmd *cobra.Command, args []string) {
 	}
 }
 
-func setEnvVar(cmd *cobra.Command, env, key, val string) {
+func setEnvVar(env, key, val string, personal bool) {
 	envMap := loadEnv(env)
 	// Check if we are setting a personal env var
-	personal := false
-	if cmd.Flag("personal") != nil {
-		personal = cmd.Flag("personal").Value.String() == "true"
-	}
 
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
-		logger.Fatal().Msg("Attempting to set an existing shared env var as personal, please rm this env var and set again")
+		logger.Fatal().Msgf("Attempting to set an existing shared env var \"%s\" as personal, please rm this env var and set again", key)
 	}
 	if envVar, exists := envMap[key]; exists && !personal && envVar.Personal {
 		// update and warn

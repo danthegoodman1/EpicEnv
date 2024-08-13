@@ -65,6 +65,17 @@ You can also import an existing `.env` file with:
 epicenv import PATH
 ```
 
+If a line ends with `#personal` like:
+
+```ini
+shared_thing="this val is shared"
+personal_thing=fheruifh #personal
+```
+
+then it will automatically be added as a personal variable. This is very convenient if you have an existing `.env` file to import that has many mixed shared and personal env vars. EpicEnv will log when it imports a personal value.
+
+Imports will overwrite existing values, using the rules for personal flag collisions mentioned below.
+
 ### Add personal environment variables
 
 For something like database or AWS credentials, you'll want to use (and enforce) using local credentials.
@@ -78,6 +89,8 @@ This will mark the env var as personal, preventing it from being committed to gi
 If someone sources the environment in the future without setting their own personal value, they will see a warning in the console notifying them that they are missing part of the environment.
 
 If they attempt to write a personal env var as a shared env var (omitting `-p`), EpicEnv will recognize this and assume they meant personal, while throwing a warning (see safety section for more).
+
+If they attempt to write a shared env var as personal, it will reject the operation and ask the user to `rm` the variable to change it to a personal variable.
 
 ### Invite collaborators
 
