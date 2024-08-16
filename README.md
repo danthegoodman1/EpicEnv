@@ -69,7 +69,7 @@ If a line ends with `#personal` like:
 
 ```ini
 shared_thing="this val is shared"
-personal_thing=fheruifh #personal
+personal_thing="this val is personal" #personal
 ```
 
 then it will automatically be added as a personal variable. This is very convenient if you have an existing `.env` file to import that has many mixed shared and personal env vars. EpicEnv will log when it imports a personal value.
