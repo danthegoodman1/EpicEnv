@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/danthegoodman1/epicenv/gologger"
-	"golang.org/x/term"
 	"os"
 	"path"
 	"strings"
 	"syscall"
+
+	"golang.org/x/term"
+
+	"github.com/danthegoodman1/epicenv/gologger"
 )
 
 var (
@@ -18,7 +20,8 @@ var (
 
 func readStdinHidden(prompt string) string {
 	fmt.Print(prompt)
-	bytePassword, err := term.ReadPassword(syscall.Stdin)
+	// IDE might complain, but the cast is necessary for some OSs, because Stdin is a var instead of an untyped const
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		panic(err)
 	}
