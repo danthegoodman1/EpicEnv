@@ -26,7 +26,7 @@ if [ $? -lt 1 ]; then
 fi
 `
 
-	err := os.WriteFile(path.Join(".epicenv", env, "activate"), []byte(fmt.Sprintf(activateContent, lo.Ternary(os.Getenv("EPICENV_DEV") != "", "go run .", "epicenv"), env, env)), 0777)
+	err := os.WriteFile(path.Join(".epicenv", env, "activate"), []byte(fmt.Sprintf(activateContent, lo.Ternary(os.Getenv("EPICENV_DEV") != "", "go run .", "epicenv"), env)), 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.WriteFile: %w", err)
 	}
