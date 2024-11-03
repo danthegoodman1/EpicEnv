@@ -85,7 +85,7 @@ For something like database or AWS credentials, you'll want to use (and enforce)
 epicenv set KEY VALUE -e myenv -p
 ```
 
-This will mark the env var as personal, preventing it from being committed to git.
+This will mark the env var as personal, and should be prevent from being committed to git (add something like `.epicenv/*/personal_keys.json` to your `.gitignore`).
 
 If someone sources the environment in the future without setting their own personal value, they will see a warning in the console notifying them that they are missing part of the environment.
 
@@ -146,11 +146,13 @@ You can remove global and personal variables with:
 epicenv rm KEY -e myenv
 ```
 
-### Use in deployments
+## Use in deployments (machine users)
 
-While epicenv was originally designed for managing local environments, it's reasonable to use this system for deployments.
+While epicenv was originally designed for managing local environments, it's reasonable to use this system for deployments. This is done via "machine users", which are effectively users without github accounts (manual key specification).
 
-#### Adding deployment machines
+Personal keys are not supported for machine users, so you'll want to ensure that you create dedicated environments for machine users.
+
+### Managing machine users
 
 To add a machine for deployments:
 
@@ -164,7 +166,7 @@ This will register the machine's public key for decrypting the environment. You 
 epicenv machine rm prod-server -e prod
 ```
 
-#### Using on deployment machines
+### Using machine users
 
 There are two ways to set up epicenv on your deployment machines:
 
@@ -196,11 +198,11 @@ source .epicenv/prod/activate
 npm start
 ```
 
-#### Usage in Docker
+### Usage in Docker
 
 Simply replace your `CMD ...` with `CMD ["bash", "run.sh"]` where the script contains the contents similar to the examples above.
 
-#### Example CI/CD usage
+### Example CI/CD usage
 
 For GitHub Actions:
 
