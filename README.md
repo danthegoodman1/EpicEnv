@@ -20,6 +20,7 @@ _Currently only supports macOS and Linux_
     * [Deactivate the environment](#deactivate-the-environment)
     * [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
     * [Remove variables](#remove-variables)
+    * [Use in deployments](#use-in-deployments)
   * [Motivation](#motivation)
   * [Safety](#safety)
     * [Encryption](#encryption)
@@ -145,6 +146,73 @@ You can remove global and personal variables with:
 epicenv rm KEY -e myenv
 ```
 
+### Use in deployments
+
+While epicenv was originally designed for managing local environments, it's reasonable to use this system for deployments.
+
+#### Adding deployment machines
+
+To add a machine for deployments:
+
+```bash
+epicenv machine add prod-server /path/to/public_key.pub -e prod
+```
+
+This will register the machine's public key for decrypting the environment. You can also remove machines:
+
+```bash
+epicenv machine rm prod-server -e prod
+```
+
+#### Using on deployment machines
+
+There are two ways to set up epicenv on your deployment machines:
+
+1. With explicit key path:
+```bash
+# 1. Set env vars
+export EPICENV_MACHINE_NAME=prod-server
+export EPICENV_MACHINE_KEY=/path/to/private_key
+
+# 2. Source epic env
+source .epicenv/prod/activate
+
+# 3. Run your app
+./app
+```
+
+2. Using conventional key locations:
+```bash
+# 1. Set env vars
+export EPICENV_MACHINE_NAME=prod-server
+
+# 2. Source epic env
+# EpicEnv will automatically look for private keys in:
+# ~/.ssh/machine_prod-server
+# ~/.ssh/prod-server
+source .epicenv/prod/activate
+
+# 3. Run your app
+npm start
+```
+
+#### Usage in Docker
+
+Simply replace your `CMD ...` with `CMD ["bash", "run.sh"]` where the script contains the contents similar to the examples above.
+
+#### Example CI/CD usage
+
+For GitHub Actions:
+
+```yaml
+steps:
+  - name: Setup deployment environment
+    run: |
+      echo "${{ secrets.DEPLOY_PRIVATE_KEY }}" > ~/.ssh/prod-server
+      chmod 600 ~/.ssh/prod-server
+      export EPICENV_MACHINE_NAME=prod-server
+      source .epicenv/prod/activate
+```
 
 ## Motivation
 
