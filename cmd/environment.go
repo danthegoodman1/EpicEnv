@@ -3,10 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/samber/lo"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
 
 // getEnvOrFlag will attempt to read the flag, then environment, then print a message and exit
@@ -116,6 +117,29 @@ func loadSymmetricKey(env string) ([]byte, error) {
 		return nil, fmt.Errorf("error reading keys file: %w", err)
 	}
 
+	// First try machine user if EPICENV_MACHINE_NAME is set
+	if machineName := os.Getenv("EPICENV_MACHINE_NAME"); machineName != "" {
+		machineKey, found := lo.Find(keysFile.EncryptedKeys, func(item EncryptedKey) bool {
+			return item.MachineName == machineName
+		})
+		if !found {
+			return nil, fmt.Errorf("machine user %s not found in environment", machineName)
+		}
+
+		keyPair, err := findPrivateKeyForMachineName(machineName, machineKey.PublicKey)
+		if err != nil {
+			return nil, fmt.Errorf("error finding private key for machine user: %w", err)
+		}
+
+		symKey, err := decryptWithPrivateKey(machineKey.EncryptedSharedKey, keyPair)
+		if err != nil {
+			return nil, err
+		}
+
+		return symKey, nil
+	}
+
+	// Otherwise try GitHub user flow
 	keyPairs := findPrivateKeysForPublicKeys(lo.Map(keysFile.EncryptedKeys, func(item EncryptedKey, index int) string {
 		return item.PublicKey
 	}))

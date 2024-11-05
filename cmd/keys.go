@@ -4,13 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
@@ -104,4 +106,61 @@ func getKeysForGithubUsername(username string) ([]string, error) {
 	})
 
 	return keys, nil
+}
+
+// Add this function to handle machine user key loading
+func findPrivateKeyForMachineName(machineName string, pubKeyContent string) (keyPair, error) {
+	// First check if EPICENV_MACHINE_KEY is set
+	if keyPath := os.Getenv("EPICENV_MACHINE_KEY"); keyPath != "" {
+		fileContent, err := os.ReadFile(keyPath)
+		if err != nil {
+			return keyPair{}, fmt.Errorf("error reading machine key file: %w", err)
+		}
+
+		// Verify this is the correct key by comparing public keys
+		pubKey, err := ssh.ParsePrivateKey(fileContent)
+		if err != nil {
+			return keyPair{}, fmt.Errorf("error parsing private key: %w", err)
+		}
+
+		marshaledPubKey := string(ssh.MarshalAuthorizedKey(pubKey.PublicKey()))
+		if marshaledPubKey == pubKeyContent {
+			return keyPair{
+				publicKeyContent: pubKeyContent,
+				privateKeyPath:   keyPath,
+			}, nil
+		}
+		return keyPair{}, fmt.Errorf("provided key does not match machine user's public key")
+	}
+
+	// If no env var, look in default locations
+	defaultLocations := []string{
+		path.Join(os.Getenv("HOME"), ".ssh", fmt.Sprintf("machine_%s", machineName)),
+		path.Join(os.Getenv("HOME"), ".ssh", machineName),
+	}
+
+	for _, loc := range defaultLocations {
+		if _, err := os.Stat(loc); err == nil {
+			// Found a potential key, verify it
+			fileContent, err := os.ReadFile(loc)
+			if err != nil {
+				continue
+			}
+
+			pubKey, err := ssh.ParsePrivateKey(fileContent)
+			if err != nil {
+				continue
+			}
+
+			marshaledPubKey := string(ssh.MarshalAuthorizedKey(pubKey.PublicKey()))
+			if marshaledPubKey == pubKeyContent {
+				return keyPair{
+					publicKeyContent: pubKeyContent,
+					privateKeyPath:   loc,
+				}, nil
+			}
+		}
+	}
+
+	return keyPair{}, fmt.Errorf("could not find matching private key for machine user %s", machineName)
 }

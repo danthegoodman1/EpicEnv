@@ -14,11 +14,14 @@ type (
 
 	EncryptedKey struct {
 		// GitHub username, there may be many for the same
-		Username  string
+		Username  string `json:",omitempty"`
 		PublicKey string
 
 		// EncryptedSharedKey base64 encoded encrypted bytes
 		EncryptedSharedKey string
+
+		// MachineName is the provided name for machine users
+		MachineName string `json:",omitempty"`
 	}
 )
 

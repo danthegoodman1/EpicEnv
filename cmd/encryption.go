@@ -10,9 +10,10 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"golang.org/x/crypto/ssh"
 	"io"
 	"os"
+
+	"golang.org/x/crypto/ssh"
 )
 
 func generateAESKey() []byte {
