@@ -125,7 +125,7 @@ You can also run this command to update the local environment when changes are p
 You can deactivate the environment, which will return environment variables to their previous state (previous value or unset).
 
 ```
-deactivate
+epic-deactivate
 ```
 
 If you are already in an environment, deactivate will automatically be run when you switch or refresh.

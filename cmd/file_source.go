@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/samber/lo"
 	"os"
 	"path"
+
+	"github.com/samber/lo"
 )
 
 func generateActivateSource(env string) error {
@@ -12,7 +13,7 @@ func generateActivateSource(env string) error {
     # do nothing
 else
     echo deactivating $EPICENV
-    deactivate
+    epic-deactivate
 fi
 temp_src=$(%s zzz_INTERNAL_gen -e %s)
 if [ $? -lt 1 ]; then
