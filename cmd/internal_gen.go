@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/samber/lo"
-	"github.com/spf13/cobra"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
 
 // internalGenCmd represents the internalGen command
@@ -55,10 +56,10 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 
 	// We allow for nested prefixes so they user knows how they environments are stacked
 	sourceFile += fmt.Sprintf("PS1=\"(epicenv: %s)$PS1\"\n", env)
-	sourceFile += "deactivate() {\n  "
+	sourceFile += "epic-deactivate() {\n  "
 	sourceFile += strings.Join(undoLines, "\n  ")
 	sourceFile += "\n  PS1=$OLDPS1\n"
-	sourceFile += "  unset -f deactivate\n"
+	sourceFile += "  unset -f epic-deactivate\n"
 	sourceFile += "}"
 
 	tempSourcePath := path.Join(".epicenv", env, fmt.Sprintf("temp-%d", time.Now().UnixMilli()))
@@ -71,6 +72,10 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 }
 
 func wrapQuotesIfNeeded(s string) string {
+	// Escape any existing quotes and dollar signs
+	s = strings.ReplaceAll(s, "\"", "\\\"")
+	s = strings.ReplaceAll(s, "$", "\\$")
+
 	if strings.Contains(s, " ") && s[0:1] != "\"" && s[len(s)-1:] != "\"" {
 		return "\"" + s + "\""
 	}
