@@ -9,9 +9,7 @@ import (
 )
 
 func generateActivateSource(env string) error {
-	activateContent := `if [ -z "${EPICENV}" ]; then
-    # do nothing
-else
+	activateContent := `if [ -n "${EPICENV}" ]; then
     echo deactivating $EPICENV
     epic-deactivate
 fi
@@ -19,10 +17,10 @@ temp_src=$(%s zzz_INTERNAL_gen -e %s)
 if [ $? -lt 1 ]; then
 	echo activated env %s
     source $temp_src
-    if [ -z "${EPICENV_DEV}" ]; then
-        rm $temp_src
-    else
+    if [ -n "${EPICENV_DEV}" ]; then
         echo leaving temp file $temp_src for debug
+    else
+        rm $temp_src
     fi
 fi
 `
