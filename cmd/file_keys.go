@@ -38,9 +38,9 @@ func readKeysFile(env string) (*KeysFile, error) {
 }
 
 func writeKeysFile(env string, keysFile KeysFile) error {
-	fileBytes, err := json.Marshal(keysFile)
+	fileBytes, err := json.MarshalIndent(keysFile, "", "  ")
 	if err != nil {
-		return fmt.Errorf("error in json.Marshal: %w", err)
+		return fmt.Errorf("error in json.MarshalIndent: %w", err)
 	}
 
 	err = os.MkdirAll(path.Join(".epicenv", env), 0777)

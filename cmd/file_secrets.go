@@ -51,9 +51,9 @@ func readSecretsFile(env string, personal bool) (*SecretsFile, error) {
 }
 
 func writeSecretsFile(env string, secretsFile SecretsFile, personal bool) error {
-	fileBytes, err := json.Marshal(secretsFile)
+	fileBytes, err := json.MarshalIndent(secretsFile, "", "  ")
 	if err != nil {
-		return fmt.Errorf("error in json.Marshal: %w", err)
+		return fmt.Errorf("error in json.MarshalIndent: %w", err)
 	}
 
 	err = os.MkdirAll(path.Join(".epicenv", env), 0777)
