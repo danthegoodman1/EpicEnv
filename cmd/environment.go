@@ -33,7 +33,7 @@ type loadedEnvVar struct {
 func loadEnv(env string) map[string]loadedEnvVar {
 	symKey, err := loadSymmetricKey(env)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("error reading key file")
+		logger.Fatal().Err(err).Msg("error loading symmetric key")
 	}
 
 	// decrypt keys
