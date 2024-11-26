@@ -23,7 +23,11 @@ type keyPair struct {
 }
 
 func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
-	files, err := os.ReadDir(path.Join(os.Getenv("HOME"), ".ssh"))
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		return nil
+	}
+	files, err := os.ReadDir(path.Join(homedir, ".ssh"))
 	if err != nil {
 		return nil
 	}
@@ -36,7 +40,7 @@ func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
 		}
 
 		// Find a file that shares content with the pub keys
-		fileContent, err := os.ReadFile(path.Join(os.Getenv("HOME"), ".ssh", file.Name()))
+		fileContent, err := os.ReadFile(path.Join(homedir, ".ssh", file.Name()))
 		if err != nil {
 			return nil
 		}
