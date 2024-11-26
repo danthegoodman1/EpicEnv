@@ -32,6 +32,9 @@ type loadedEnvVar struct {
 // loadEnv will short circuit fatal exit if it has an unrecoverable error
 func loadEnv(env string) map[string]loadedEnvVar {
 	symKey, err := loadSymmetricKey(env)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error reading key file")
+	}
 
 	// decrypt keys
 	secretsFile, err := readSecretsFile(env, false)
