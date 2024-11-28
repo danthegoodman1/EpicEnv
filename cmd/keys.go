@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 var (
@@ -25,10 +26,13 @@ type keyPair struct {
 func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to get home dir")
 		return nil
 	}
-	files, err := os.ReadDir(path.Join(homedir, ".ssh"))
+	sshDir := path.Join(homedir, ".ssh")
+	files, err := os.ReadDir(sshDir)
 	if err != nil {
+		logger.Error().Err(err).Msg("failed to read .ssh dir")
 		return nil
 	}
 
@@ -40,9 +44,11 @@ func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
 		}
 
 		// Find a file that shares content with the pub keys
-		fileContent, err := os.ReadFile(path.Join(homedir, ".ssh", file.Name()))
+		filePath := path.Join(sshDir, file.Name())
+		fileContent, err := os.ReadFile(filePath)
 		if err != nil {
-			return nil
+			logger.Warn().Err(err).Msgf("failed to read file %s", filePath)
+			continue
 		}
 
 		logger.Debug().Msgf("Checking file %s", file.Name())
@@ -66,7 +72,7 @@ func findPrivateKeysForPublicKeys(pubKeys []string) []keyPair {
 
 		keys = append(keys, keyPair{
 			publicKeyContent: keyContent,
-			privateKeyPath:   path.Join(os.Getenv("HOME"), ".ssh", privateKeyFile),
+			privateKeyPath:   path.Join(sshDir, privateKeyFile),
 		})
 	}
 
