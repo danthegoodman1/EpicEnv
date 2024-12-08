@@ -13,7 +13,7 @@ _Currently only supports macOS and Linux_
   * [Quick Start](#quick-start)
     * [Install EpicEnv](#install-epicenv)
     * [Initialize EpicEnv](#initialize-epicenv)
-    * [Add shared environment variables](#add-shared-environment-variables)
+    * [Set shared environment variables](#set-shared-environment-variables)
     * [Add personal environment variables](#add-personal-environment-variables)
     * [Invite collaborators](#invite-collaborators)
     * [Source the environment](#source-the-environment)
@@ -47,18 +47,21 @@ This will walk you through creating an EpicEnv `environment`. You can use differ
 
 This will create a `.epicenv` directory, and add `.epicenv/*/personal` to your `.gitignore`.
 
-### Add shared environment variables
+### Set shared environment variables
 
-You can add individual variables with:
+You can set individual variables with:
 
 ```
-epicenv set KEY VALUE -e myenv
+epicenv set KEY [VALUE] -e myenv
 ```
 
-You can run this again to replace values as well.
+If you omit the value, then it will ask for the value via hidden stdin:
 
-_Pro-tip: put a space before typing the command to prevent it from being added to your shell history (thus preventing leaks). You can also use `-i` to have the command prompt for the input from stdin_
+```
+epicenv set MYVAR -e myenv
 
+MYVAR> 🔑
+```
 You can also import an existing `.env` file with:
 
 ```
