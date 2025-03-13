@@ -27,11 +27,28 @@ func runEnvfile(cmd *cobra.Command, args []string) {
 
 	// Output in .env format
 	for key, val := range envMap {
+		// Escape backslashes in the value
+		escapedValue := escapeBackslashes(val.Value)
+
 		if val.Personal {
 			// Add comment for personal vars
-			fmt.Printf("%s=%s #personal\n", key, wrapQuotesIfNeeded(val.Value))
+			fmt.Printf("%s=%s #personal\n", key, wrapQuotesIfNeeded(escapedValue))
 		} else {
-			fmt.Printf("%s=%s\n", key, wrapQuotesIfNeeded(val.Value))
+			fmt.Printf("%s=%s\n", key, wrapQuotesIfNeeded(escapedValue))
 		}
 	}
+}
+
+// escapeBackslashes replaces each backslash with two backslashes
+func escapeBackslashes(s string) string {
+	// Replace each \ with \\
+	var result string
+	for _, c := range s {
+		if c == '\\' {
+			result += "\\\\"
+		} else {
+			result += string(c)
+		}
+	}
+	return result
 }
