@@ -45,7 +45,7 @@ func escapeBackslashes(s string) string {
 	var result string
 	for _, c := range s {
 		if c == '\\' {
-			result += "\\\\\\"
+			result += "\\\\"
 		} else {
 			result += string(c)
 		}
