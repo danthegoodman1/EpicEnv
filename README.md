@@ -188,3 +188,12 @@ To make a personal variable shared, first `rm` the personal variable, then set i
 ### Rotating keys
 
 We explicitly DO NOT change the symmetric key for decryption of environment variables when you uninvite a collaborator to FORCE YOU TO ROTATE KEYS IF SOMEONE LEAVES YOUR TEAM!!!!!!!!!!
+
+## Developing
+
+Need to:
+
+```
+git tag -a v#.#.# -m "some patch notes"
+git push origin v#.#.#
+```

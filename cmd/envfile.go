@@ -39,13 +39,13 @@ func runEnvfile(cmd *cobra.Command, args []string) {
 	}
 }
 
-// escapeBackslashes replaces each backslash with two backslashes
+// escapeBackslashes replaces each backslash with three backslashes because bash
 func escapeBackslashes(s string) string {
 	// Replace each \ with \\
 	var result string
 	for _, c := range s {
 		if c == '\\' {
-			result += "\\\\"
+			result += "\\\\\\"
 		} else {
 			result += string(c)
 		}
