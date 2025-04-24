@@ -10,7 +10,7 @@ var listInvitesCmd = &cobra.Command{
 	Use:   "list-invites",
 	Short: "List all GitHub users invited to the environment",
 	Long: `List all GitHub users that have been invited to the environment.
-	
+
 Example:
   epicenv list-invites -e prod`,
 	Run: runListInvites,
