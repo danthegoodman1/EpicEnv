@@ -16,6 +16,7 @@ _Currently only supports macOS and Linux_
     * [Set shared environment variables](#set-shared-environment-variables)
     * [Add personal environment variables](#add-personal-environment-variables)
     * [Invite collaborators](#invite-collaborators)
+    * [Add headless keys](#add-headless-keys)
     * [Source the environment](#source-the-environment)
     * [Deactivate the environment](#deactivate-the-environment)
     * [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
@@ -112,6 +113,22 @@ epicenv uninvite danthegoodman1
 Which will re-encrypt all values, removing their access.
 
 **Note you still need to rotate your secrets if someone leaves your team!**
+
+### Add headless keys
+
+You can also add public keys directly from files (not associated with GitHub users) using the `--path` option:
+
+```
+epicenv invite keyname --path /path/to/public_key.pub
+```
+
+These "headless keys" can be managed just like GitHub users:
+
+```
+epicenv uninvite keyname
+```
+
+This is useful for CI/CD systems, service accounts, or other automated systems that need access to environment variables.
 
 ### Source the environment
 

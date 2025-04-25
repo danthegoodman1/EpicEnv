@@ -19,6 +19,9 @@ type (
 
 		// EncryptedSharedKey base64 encoded encrypted bytes
 		EncryptedSharedKey string
+
+		// IsHeadless indicates if this is a headless key (not associated with a GitHub user)
+		IsHeadless bool
 	}
 )
 

@@ -8,8 +8,8 @@ import (
 // listInvitesCmd represents the list-invites command
 var listInvitesCmd = &cobra.Command{
 	Use:   "list-invites",
-	Short: "List all GitHub users invited to the environment",
-	Long: `List all GitHub users that have been invited to the environment.
+	Short: "List all GitHub users and headless keys invited to the environment",
+	Long: `List all GitHub users and headless keys that have been invited to the environment.
 
 Example:
   epicenv list-invites -e prod`,
@@ -30,7 +30,7 @@ func runListInvites(cmd *cobra.Command, args []string) {
 	}
 
 	if len(keysFile.EncryptedKeys) == 0 {
-		logger.Info().Msgf("No users are invited to environment '%s'", env)
+		logger.Info().Msgf("No users or keys are invited to environment '%s'", env)
 		return
 	}
 
@@ -39,14 +39,42 @@ func runListInvites(cmd *cobra.Command, args []string) {
 		return key.Username
 	}))
 
-	// Get count of keys per user
+	// Get count of keys per user and track which are headless
 	userKeyCounts := make(map[string]int)
+	userIsHeadless := make(map[string]bool)
+
 	for _, key := range keysFile.EncryptedKeys {
 		userKeyCounts[key.Username]++
+		if key.IsHeadless {
+			userIsHeadless[key.Username] = true
+		}
 	}
 
-	logger.Info().Msgf("Users invited to environment '%s':", env)
+	// Separate GitHub users from headless keys
+	var githubUsers []string
+	var headlessKeys []string
+
 	for _, username := range usernames {
-		logger.Info().Msgf("- %s (%d keys)", username, userKeyCounts[username])
+		if userIsHeadless[username] {
+			headlessKeys = append(headlessKeys, username)
+		} else {
+			githubUsers = append(githubUsers, username)
+		}
+	}
+
+	logger.Info().Msgf("Keys invited to environment '%s':", env)
+
+	if len(githubUsers) > 0 {
+		logger.Info().Msg("GitHub Users:")
+		for _, username := range githubUsers {
+			logger.Info().Msgf("- %s (%d keys)", username, userKeyCounts[username])
+		}
+	}
+
+	if len(headlessKeys) > 0 {
+		logger.Info().Msg("Headless Keys:")
+		for _, keyname := range headlessKeys {
+			logger.Info().Msgf("- %s (%d keys)", keyname, userKeyCounts[keyname])
+		}
 	}
 }
