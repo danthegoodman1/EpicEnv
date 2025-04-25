@@ -62,7 +62,8 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 	sourceFile += "  unset -f epic-deactivate\n"
 	sourceFile += "}"
 
-	tempSourcePath := path.Join(".epicenv", env, fmt.Sprintf("temp-%d", time.Now().UnixMilli()))
+	epicEnvPath := getEpicEnvPath()
+	tempSourcePath := path.Join(epicEnvPath, env, fmt.Sprintf("temp-%d", time.Now().UnixMilli()))
 	err := os.WriteFile(tempSourcePath, []byte(sourceFile), 0777)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error writing out temp file")

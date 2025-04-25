@@ -3,10 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/samber/lo"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
 
 // getEnvOrFlag will attempt to read the flag, then environment, then print a message and exit
@@ -135,7 +136,7 @@ func loadSymmetricKey(env string) ([]byte, error) {
 		return item.PublicKey == chosenKey.publicKeyContent
 	})
 	if !found {
-		return nil, fmt.Errorf("did not find the known public key again among the encrypted keys, this is a bug. Please report.")
+		return nil, fmt.Errorf("did not find the known public key again among the encrypted keys, this is a bug. Please report")
 	}
 
 	symKey, err := decryptWithPrivateKey(actualKey.EncryptedSharedKey, chosenKey)

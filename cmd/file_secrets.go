@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/samber/lo"
 	"os"
 	"path"
+
+	"github.com/samber/lo"
 )
 
 type (
@@ -30,7 +31,8 @@ type (
 )
 
 func readSecretsFile(env string, personal bool) (*SecretsFile, error) {
-	fileBytes, err := os.ReadFile(path.Join(".epicenv", env, lo.Ternary(personal, "personal_secrets.json", "secrets.json")))
+	epicEnvPath := getEpicEnvPath()
+	fileBytes, err := os.ReadFile(path.Join(epicEnvPath, env, lo.Ternary(personal, "personal_secrets.json", "secrets.json")))
 	if personal && errors.Is(err, os.ErrNotExist) {
 		// Create a blank one and return
 		secretsFile := SecretsFile{}
@@ -51,17 +53,18 @@ func readSecretsFile(env string, personal bool) (*SecretsFile, error) {
 }
 
 func writeSecretsFile(env string, secretsFile SecretsFile, personal bool) error {
+	epicEnvPath := getEpicEnvPath()
 	fileBytes, err := json.MarshalIndent(secretsFile, "", "  ")
 	if err != nil {
 		return fmt.Errorf("error in json.MarshalIndent: %w", err)
 	}
 
-	err = os.MkdirAll(path.Join(".epicenv", env), 0777)
+	err = os.MkdirAll(path.Join(epicEnvPath, env), 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.MkdirAll: %w", err)
 	}
 
-	err = os.WriteFile(path.Join(".epicenv", env, lo.Ternary(personal, "personal_secrets.json", "secrets.json")), fileBytes, 0777)
+	err = os.WriteFile(path.Join(epicEnvPath, env, lo.Ternary(personal, "personal_secrets.json", "secrets.json")), fileBytes, 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.WriteFile: %w", err)
 	}

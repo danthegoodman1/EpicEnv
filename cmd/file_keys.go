@@ -26,7 +26,8 @@ type (
 )
 
 func readKeysFile(env string) (*KeysFile, error) {
-	fileBytes, err := os.ReadFile(path.Join(".epicenv", env, "keys.json"))
+	epicEnvPath := getEpicEnvPath()
+	fileBytes, err := os.ReadFile(path.Join(epicEnvPath, env, "keys.json"))
 	if err != nil {
 		return nil, fmt.Errorf("error in os.ReadFile: %w", err)
 	}
@@ -41,17 +42,18 @@ func readKeysFile(env string) (*KeysFile, error) {
 }
 
 func writeKeysFile(env string, keysFile KeysFile) error {
+	epicEnvPath := getEpicEnvPath()
 	fileBytes, err := json.MarshalIndent(keysFile, "", "  ")
 	if err != nil {
 		return fmt.Errorf("error in json.MarshalIndent: %w", err)
 	}
 
-	err = os.MkdirAll(path.Join(".epicenv", env), 0777)
+	err = os.MkdirAll(path.Join(epicEnvPath, env), 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.MkdirAll: %w", err)
 	}
 
-	err = os.WriteFile(path.Join(".epicenv", env, "keys.json"), fileBytes, 0777)
+	err = os.WriteFile(path.Join(epicEnvPath, env, "keys.json"), fileBytes, 0777)
 	if err != nil {
 		return fmt.Errorf("error in os.WriteFile: %w", err)
 	}
