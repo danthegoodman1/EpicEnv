@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -65,7 +66,7 @@ func runInvite(cmd *cobra.Command, args []string) {
 			logger.Fatal().Err(err).Msgf("error reading key file %s", pathFlag)
 		}
 
-		publicKey := string(keyData)
+		publicKey := strings.TrimSpace(string(keyData))
 		foundKeys = []string{publicKey}
 	} else {
 		// Handle GitHub user
