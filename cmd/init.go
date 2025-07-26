@@ -21,7 +21,7 @@ func runInit(cmd *cobra.Command, args []string) {
 	// name env (default)
 	env := readStdin("Create a new environment [default]> ")
 	if env == "" {
-		env = "default"
+		env = "local"
 	}
 	logger.Debug().Msgf("Got env %s", env)
 
