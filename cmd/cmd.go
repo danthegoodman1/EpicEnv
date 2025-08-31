@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -30,13 +29,6 @@ func readStdinHidden(prompt string) string {
 	}
 	fmt.Println() // Move to the next line after input
 	return string(bytePassword)
-}
-
-func readStdin(prompt string) string {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(prompt)
-	text, _ := reader.ReadString('\n')
-	return strings.TrimSpace(text)
 }
 
 var ErrEnvDirNotFound = errors.New("epicenv directory not found")
@@ -106,4 +98,32 @@ func envExists(env string) bool {
 	}
 
 	return true
+}
+
+// listEnvironments returns a list of all available environments
+func listEnvironments() ([]string, error) {
+	epicEnvPath := getEpicEnvPath()
+
+	// Check if .epicenv directory exists
+	if _, err := os.Stat(epicEnvPath); errors.Is(err, os.ErrNotExist) {
+		return []string{}, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("error checking .epicenv directory: %w", err)
+	}
+
+	// Read directory contents
+	entries, err := os.ReadDir(epicEnvPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading .epicenv directory: %w", err)
+	}
+
+	var environments []string
+	for _, entry := range entries {
+		// Only include directories that are not hidden
+		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") && !strings.HasPrefix(entry.Name(), "temp") {
+			environments = append(environments, entry.Name())
+		}
+	}
+
+	return environments, nil
 }

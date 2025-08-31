@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// getEnvOrFlag will attempt to read the flag, then environment, then print a message and exit
+// getEnvOrFlag will attempt to read the flag, then environment, then auto-infer if only one exists
 func getEnvOrFlag(cmd *cobra.Command) string {
 	if env := cmd.Flag("environment").Value.String(); env != "" {
 		return env
@@ -20,7 +20,23 @@ func getEnvOrFlag(cmd *cobra.Command) string {
 		return env
 	}
 
-	logger.Fatal().Msg("Could not infer environment, please specify with -e")
+	// Try to auto-infer if there's only one environment
+	environments, err := listEnvironments()
+	if err != nil {
+		logger.Fatal().Err(err).Msg("Error listing environments")
+	}
+
+	if len(environments) == 1 {
+		logger.Debug().Msgf("Auto-inferred environment: %s", environments[0])
+		return environments[0]
+	}
+
+	if len(environments) == 0 {
+		logger.Fatal().Msg("No environments found. Run 'epicenv init' to create one")
+	} else {
+		logger.Fatal().Msgf("Multiple environments found (%s), please specify with -e", strings.Join(environments, ", "))
+	}
+
 	os.Exit(1)
 	return ""
 }
