@@ -9,23 +9,24 @@ All of your environments encrypted and managed in git, with basic permissions vi
 _Currently only supports macOS and Linux_
 
 <!-- TOC -->
-* [EpicEnv](#epicenv)
-  * [Quick Start](#quick-start)
-    * [Install EpicEnv](#install-epicenv)
-    * [Initialize EpicEnv](#initialize-epicenv)
-    * [Set shared environment variables](#set-shared-environment-variables)
-    * [Add personal environment variables](#add-personal-environment-variables)
-    * [Invite collaborators](#invite-collaborators)
-    * [Add headless keys](#add-headless-keys)
-    * [Source the environment](#source-the-environment)
-    * [Deactivate the environment](#deactivate-the-environment)
-    * [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
-    * [Remove variables](#remove-variables)
-  * [Motivation](#motivation)
-  * [Safety](#safety)
-    * [Encryption](#encryption)
-    * [Preventing personal variables from being added globally](#preventing-personal-variables-from-being-added-globally)
-    * [Rotating keys](#rotating-keys)
+- [EpicEnv](#epicenv)
+  - [Quick Start](#quick-start)
+    - [Install EpicEnv](#install-epicenv)
+    - [Initialize EpicEnv](#initialize-epicenv)
+    - [Set shared environment variables](#set-shared-environment-variables)
+    - [Add personal environment variables](#add-personal-environment-variables)
+    - [Invite collaborators](#invite-collaborators)
+    - [Add headless keys](#add-headless-keys)
+    - [Source the environment](#source-the-environment)
+    - [Deactivate the environment](#deactivate-the-environment)
+    - [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
+    - [Remove variables](#remove-variables)
+  - [Motivation](#motivation)
+  - [Safety](#safety)
+    - [Encryption](#encryption)
+    - [Preventing personal variables from being added globally](#preventing-personal-variables-from-being-added-globally)
+    - [Rotating keys](#rotating-keys)
+  - [Developing](#developing)
 <!-- TOC -->
 
 ## Quick Start
@@ -41,10 +42,21 @@ go install github.com/danthegoodman1/epicenv@latest
 Within your project directory, run:
 
 ```
-epicenv init
+epicenv init GITHUB_USERNAME [-e ENVIRONMENT]
 ```
 
-This will walk you through creating an EpicEnv `environment`. You can use different environments to link your local environment to different infrastructure, such as staging and production.
+For example:
+```
+epicenv init danthegoodman1
+# Creates the default "local" environment
+
+epicenv init danthegoodman1 -e staging
+# Creates a "staging" environment
+```
+
+Your GitHub username is required as the first argument to fetch your public SSH keys. The environment name can be specified with the `-e` flag and defaults to "local" if not provided.
+
+You can use different environments to link your local environment to different infrastructure, such as staging and production.
 
 This will create a `.epicenv` directory, and add `.epicenv/*/personal` to your `.gitignore`.
 

@@ -7,10 +7,18 @@ import (
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
+	Use:   "init GITHUB_USERNAME",
 	Short: "Initialize EpicEnv",
+	Long: `Initialize EpicEnv with a new environment.
 
-	Run: runInit,
+Provide your GitHub username as an argument to fetch your public SSH keys.
+Use the -e flag to specify the environment name (defaults to "local").
+
+Examples:
+  epicenv init danthegoodman1                  # Creates default "local" environment
+  epicenv init danthegoodman1 -e staging       # Creates "staging" environment`,
+	Run:  runInit,
+	Args: cobra.ExactArgs(1),
 }
 
 func init() {
@@ -18,8 +26,15 @@ func init() {
 }
 
 func runInit(cmd *cobra.Command, args []string) {
-	// name env (default)
-	env := readStdin("Create a new environment [default]> ")
+	// Get GitHub username from positional argument
+	githubUser := args[0]
+	logger.Debug().Msgf("Got github username %s", githubUser)
+
+	// Get environment name from flag or use default
+	env, err := cmd.Flags().GetString("environment")
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error getting environment flag")
+	}
 	if env == "" {
 		env = "local"
 	}
@@ -31,14 +46,6 @@ func runInit(cmd *cobra.Command, args []string) {
 	}
 
 	logger.Debug().Msgf("Env %s does not exist, creating", env)
-
-	// collect their keys from github, verify they exist in $HOME/.ssh/
-	githubUser := readStdin("What is your GitHub username? So I can fetch your public key(s)> ")
-	if githubUser == "" {
-		logger.Fatal().Msg("I need your GitHub username...")
-	}
-
-	logger.Debug().Msgf("Got github username %s", githubUser)
 
 	pubKeys, err := getKeysForGithubUsername(githubUser)
 	if err != nil {
