@@ -13,6 +13,7 @@ _Currently only supports macOS and Linux_
   - [Quick Start](#quick-start)
     - [Install EpicEnv](#install-epicenv)
     - [Initialize EpicEnv](#initialize-epicenv)
+    - [Overlay Environments](#overlay-environments)
     - [Set shared environment variables](#set-shared-environment-variables)
     - [Add personal environment variables](#add-personal-environment-variables)
     - [Invite collaborators](#invite-collaborators)
@@ -59,6 +60,52 @@ Your GitHub username is required as the first argument to fetch your public SSH 
 You can use different environments to link your local environment to different infrastructure, such as staging and production.
 
 This will create a `.epicenv` directory, and add `.epicenv/*/personal` to your `.gitignore`.
+
+### Overlay Environments
+
+Overlay environments let you create environments that inherit from a base environment and override specific variables. This is useful for scenarios like having a `testing` environment that shares most settings with `local` but uses a different S3 bucket.
+
+```
+epicenv init -e testing --overlay local
+```
+
+Overlays can be stacked arbitrarily deep:
+
+```
+epicenv init -e agent-testing --overlay testing
+```
+
+This creates a chain: `local` → `testing` → `agent-testing`
+
+When you load `agent-testing`, variables are resolved by stacking each layer:
+1. Load `local` secrets
+2. Apply `testing` overrides
+3. Apply `agent-testing` overrides
+
+**Example:**
+```bash
+# Set base values in local
+epicenv set DB_HOST localhost -e local
+epicenv set S3_BUCKET s3://local-bucket -e local
+epicenv set LOG_LEVEL debug -e local
+
+# Override S3 in testing
+epicenv set S3_BUCKET s3://test-bucket -e testing
+
+# Override LOG_LEVEL in agent-testing
+epicenv set LOG_LEVEL info -e agent-testing
+
+# Loading agent-testing gives:
+# DB_HOST=localhost (from local)
+# S3_BUCKET=s3://test-bucket (from testing)
+# LOG_LEVEL=info (from agent-testing)
+```
+
+**Key behaviors:**
+- Overlays inherit encryption keys and users from their root environment
+- Inviting users to an overlay will add them to the root environment (with a warning)
+- Personal secrets are also stacked, with each layer able to add or override
+- Removing a variable from an overlay only removes it from that layer; if it exists in an underlay, it will still be visible
 
 ### Set shared environment variables
 

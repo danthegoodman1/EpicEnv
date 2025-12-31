@@ -5,9 +5,10 @@ package cmd
 
 import (
 	"errors"
+	"os"
+
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // rmCmd represents the rm command

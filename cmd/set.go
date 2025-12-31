@@ -6,9 +6,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // setCmd represents the set command
