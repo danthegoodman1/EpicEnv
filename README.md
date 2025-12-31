@@ -101,7 +101,7 @@ epicenv set LOG_LEVEL info -e agent-testing
 # LOG_LEVEL=info (from agent-testing)
 ```
 
-**Key behaviors:**
+**Behavior:**
 - Overlays inherit encryption keys and users from their root environment
 - Inviting users to an overlay will add them to the root environment (with a warning)
 - Personal secrets are also stacked, with each layer able to add or override
