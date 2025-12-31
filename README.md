@@ -6,7 +6,7 @@ It's like python virtual envs + overlayfs, but for environment variables.
 
 All of your environments encrypted and managed in git, with basic permissions via an invitation system.
 
-_Currently only targets macOS and Linux, but it appears to work on windows?_
+_Currently only targets macOS and Linux, but it appears to work on Windows?_
 
 <!-- TOC -->
 - [EpicEnv](#epicenv)
