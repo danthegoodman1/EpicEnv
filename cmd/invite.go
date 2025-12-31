@@ -33,11 +33,21 @@ func runInvite(cmd *cobra.Command, args []string) {
 	name := args[0]
 	env := getEnvOrFlag(cmd)
 
+	// Resolve to root environment for overlays
+	rootEnv, err := resolveRootEnv(env)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error resolving root environment")
+	}
+
+	if rootEnv != env {
+		logger.Warn().Msgf("Note: Adding to root environment '%s' (overlays inherit access)", rootEnv)
+	}
+
 	// Check if using path flag for headless key
 	usingPath := pathFlag != ""
 
-	// Load the keys file
-	keysFile, err := readKeysFile(env)
+	// Load the keys file from root environment
+	keysFile, err := readKeysFile(rootEnv)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error loading keys file")
 	}
@@ -113,8 +123,8 @@ func runInvite(cmd *cobra.Command, args []string) {
 		os.Exit(0)
 	}
 
-	// Write the file
-	err = writeKeysFile(env, *keysFile)
+	// Write the file to root environment
+	err = writeKeysFile(rootEnv, *keysFile)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error writing keys file")
 	}

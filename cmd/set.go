@@ -61,7 +61,7 @@ func runSet(cmd *cobra.Command, args []string) {
 
 func setEnvVar(env, key, val string, personal bool) {
 	envMap := loadEnv(env)
-	// Check if we are setting a personal env var
+	// Check if we are setting a personal env var (check merged env for personal status)
 
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
 		logger.Fatal().Msgf("Attempting to set an existing shared env var \"%s\" as personal, please rm this env var and set again", key)
@@ -90,21 +90,18 @@ func setEnvVar(env, key, val string, personal bool) {
 		logger.Fatal().Err(err).Msg("error encrypting value")
 	}
 
-	if _, exists := envMap[key]; exists {
-		// Replace the value
-		logger.Debug().Msgf("Var %s exists", key)
-		_, idx, _ := lo.FindIndexOf(secretsFile.Secrets, func(item EncryptedSecret) bool {
-			return item.Name == key
-		})
+	// Check if key exists in THIS environment's secrets (not merged)
+	_, idx, _ := lo.FindIndexOf(secretsFile.Secrets, func(item EncryptedSecret) bool {
+		return item.Name == key
+	})
 
-		if idx == -1 {
-			logger.Fatal().Msg("unable to find secret again... this is a bug, please report")
-		}
-
+	if idx != -1 {
+		// Key exists in this env's secrets, update it
+		logger.Debug().Msgf("Var %s exists in %s, updating", key, env)
 		secretsFile.Secrets[idx].Value = encrypted
 	} else {
-		logger.Debug().Msgf("Var %s does not exist", key)
-		// Append the value
+		// Key doesn't exist in this env (may exist in underlay), append it
+		logger.Debug().Msgf("Var %s does not exist in %s, adding", key, env)
 		secretsFile.Secrets = append(secretsFile.Secrets, EncryptedSecret{
 			Name:     key,
 			Personal: personal,

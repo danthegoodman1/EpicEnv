@@ -5,3 +5,4 @@
 .epicenv/temp*
 .env
 *.exe
+epicenv

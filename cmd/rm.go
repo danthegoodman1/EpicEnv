@@ -41,6 +41,17 @@ func runRm(cmd *cobra.Command, args []string) {
 		logger.Fatal().Err(err).Msg("error reading secrets file")
 	}
 
+	// Check if key exists in this environment's secrets
+	keyInThisEnv := lo.ContainsBy(secretsFile.Secrets, func(item EncryptedSecret) bool {
+		return item.Name == key
+	})
+
+	if !keyInThisEnv && !envVar.Personal {
+		// Key must be coming from an underlay
+		logger.Warn().Msgf("'%s' is defined in an underlay environment, not in '%s' - nothing to remove here", key, env)
+		os.Exit(0)
+	}
+
 	// Purge it
 	secretsFile.Secrets = lo.Filter(secretsFile.Secrets, func(item EncryptedSecret, index int) bool {
 		return item.Name != key
@@ -54,7 +65,7 @@ func runRm(cmd *cobra.Command, args []string) {
 	if envVar.Personal {
 		logger.Debug().Msgf("%s is personal, removing from personal secrets", key)
 
-		secretsFile, err = readSecretsFile(env, false)
+		secretsFile, err = readSecretsFile(env, true)
 		if errors.Is(err, os.ErrNotExist) {
 			logger.Fatal().Msg("No secrets file found to delete from")
 		} else if err != nil {
@@ -68,6 +79,26 @@ func runRm(cmd *cobra.Command, args []string) {
 		err = writeSecretsFile(env, *secretsFile, true)
 		if err != nil {
 			logger.Fatal().Err(err).Msg("error writing updated personal secrets file")
+		}
+	}
+
+	// Check if key will still be visible from underlay
+	if isOverlay(env) {
+		chain, err := getOverlayChain(env)
+		if err == nil && len(chain) > 1 {
+			// Check underlays (all except current env)
+			for _, underlayEnv := range chain[:len(chain)-1] {
+				underlaySecrets, err := readSecretsFile(underlayEnv, false)
+				if err != nil {
+					continue
+				}
+				if lo.ContainsBy(underlaySecrets.Secrets, func(item EncryptedSecret) bool {
+					return item.Name == key
+				}) {
+					logger.Warn().Msgf("Note: '%s' still exists in underlay '%s' and will be visible", key, underlayEnv)
+					break
+				}
+			}
 		}
 	}
 

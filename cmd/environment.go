@@ -46,74 +46,25 @@ type loadedEnvVar struct {
 	Personal bool
 }
 
-// loadEnv will short circuit fatal exit if it has an unrecoverable error
+// loadEnv will short circuit fatal exit if it has an unrecoverable error.
+// For overlay environments, it loads and merges secrets through the entire chain.
 func loadEnv(env string) map[string]loadedEnvVar {
 	symKey, err := loadSymmetricKey(env)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error loading symmetric key")
 	}
 
-	// decrypt keys
-	secretsFile, err := readSecretsFile(env, false)
-	if errors.Is(err, os.ErrNotExist) {
-		return map[string]loadedEnvVar{}
-	}
+	// Get the overlay chain (from root to target)
+	chain, err := getOverlayChain(env)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("error reading shared secrets file, is it corrupted?")
+		logger.Fatal().Err(err).Msg("error getting overlay chain")
 	}
 
-	envVars := lo.Map(secretsFile.Secrets, func(item EncryptedSecret, index int) DecryptedSecret {
-		envVar := DecryptedSecret{
-			Name:     item.Name,
-			Value:    "",
-			Personal: item.Personal,
-		}
-		if !item.Personal {
-			envVar.Value, err = decryptAESGCM(symKey, item.Value)
-			if err != nil {
-				logger.Fatal().Err(err).Msgf("error decrypting shared environment variable %s", item.Name)
-			}
-		}
-		return envVar
-	})
+	envMap := make(map[string]loadedEnvVar)
 
-	envMap := lo.Associate(envVars, func(item DecryptedSecret) (string, loadedEnvVar) {
-		return item.Name, loadedEnvVar{
-			Value:    item.Value,
-			Personal: item.Personal,
-		}
-	})
-
-	personal := lo.Filter(envVars, func(item DecryptedSecret, index int) bool {
-		return item.Personal
-	})
-
-	// join personal keys
-	if len(personal) > 0 {
-		secretsFile, err = readSecretsFile(env, true)
-		if err != nil {
-			logger.Fatal().Err(err).Msg("error reading personal secrets file, is it corrupted?")
-		}
-
-		personalEnvVars := lo.Map(secretsFile.Secrets, func(item EncryptedSecret, index int) DecryptedSecret {
-			envVar := DecryptedSecret{
-				Name:     item.Name,
-				Value:    "",
-				Personal: false,
-			}
-			envVar.Value, err = decryptAESGCM(symKey, item.Value)
-			if err != nil {
-				logger.Fatal().Err(err).Msgf("error decrypting personal environment variable %s", item.Name)
-			}
-			return envVar
-		})
-
-		for _, personalVar := range personalEnvVars {
-			envMap[personalVar.Name] = loadedEnvVar{
-				Value:    personalVar.Value,
-				Personal: true,
-			}
-		}
+	// Load and merge secrets from each environment in the chain
+	for _, chainEnv := range chain {
+		loadEnvLayer(chainEnv, symKey, envMap)
 	}
 
 	// Find any that we didn't fill in from personal secrets and warn
@@ -127,8 +78,72 @@ func loadEnv(env string) map[string]loadedEnvVar {
 	return envMap
 }
 
+// loadEnvLayer loads secrets from a single environment and merges them into envMap.
+// Later layers override earlier ones.
+func loadEnvLayer(env string, symKey []byte, envMap map[string]loadedEnvVar) {
+	secretsFile, err := readSecretsFile(env, false)
+	if errors.Is(err, os.ErrNotExist) {
+		return
+	}
+	if err != nil {
+		logger.Fatal().Err(err).Msgf("error reading shared secrets file for %s, is it corrupted?", env)
+	}
+
+	// Track which keys are personal in this layer (need personal values)
+	var personalKeys []string
+
+	for _, item := range secretsFile.Secrets {
+		if item.Personal {
+			personalKeys = append(personalKeys, item.Name)
+			// Mark as personal placeholder if not already set with a value
+			if existing, exists := envMap[item.Name]; !exists || existing.Value == "" {
+				envMap[item.Name] = loadedEnvVar{
+					Value:    "",
+					Personal: true,
+				}
+			}
+		} else {
+			decrypted, err := decryptAESGCM(symKey, item.Value)
+			if err != nil {
+				logger.Fatal().Err(err).Msgf("error decrypting shared environment variable %s", item.Name)
+			}
+			envMap[item.Name] = loadedEnvVar{
+				Value:    decrypted,
+				Personal: false,
+			}
+		}
+	}
+
+	// Load personal secrets for this layer
+	if len(personalKeys) > 0 {
+		personalSecretsFile, err := readSecretsFile(env, true)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			logger.Fatal().Err(err).Msgf("error reading personal secrets file for %s, is it corrupted?", env)
+		}
+
+		if personalSecretsFile != nil {
+			for _, item := range personalSecretsFile.Secrets {
+				decrypted, err := decryptAESGCM(symKey, item.Value)
+				if err != nil {
+					logger.Fatal().Err(err).Msgf("error decrypting personal environment variable %s", item.Name)
+				}
+				envMap[item.Name] = loadedEnvVar{
+					Value:    decrypted,
+					Personal: true,
+				}
+			}
+		}
+	}
+}
+
 func loadSymmetricKey(env string) ([]byte, error) {
-	keysFile, err := readKeysFile(env)
+	// Resolve to root environment for overlays
+	rootEnv, err := resolveRootEnv(env)
+	if err != nil {
+		return nil, fmt.Errorf("error resolving root environment: %w", err)
+	}
+
+	keysFile, err := readKeysFile(rootEnv)
 	if errors.Is(err, os.ErrNotExist) {
 		logger.Fatal().Msg("Keys file not found, make sure to run init command first")
 	}

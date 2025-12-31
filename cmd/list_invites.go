@@ -23,8 +23,14 @@ func init() {
 func runListInvites(cmd *cobra.Command, args []string) {
 	env := getEnvOrFlag(cmd)
 
-	// Load the keys file
-	keysFile, err := readKeysFile(env)
+	// Resolve to root environment for overlays
+	rootEnv, err := resolveRootEnv(env)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("error resolving root environment")
+	}
+
+	// Load the keys file from root environment
+	keysFile, err := readKeysFile(rootEnv)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error reading keys file")
 	}
@@ -62,7 +68,11 @@ func runListInvites(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	logger.Info().Msgf("Keys invited to environment '%s':", env)
+	if rootEnv != env {
+		logger.Warn().Msgf("'%s' is an overlay - keys are invited to root environment '%s':", env, rootEnv)
+	} else {
+		logger.Info().Msgf("Keys invited to environment '%s':", env)
+	}
 
 	if len(githubUsers) > 0 {
 		logger.Info().Msg("GitHub Users:")
