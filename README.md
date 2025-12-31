@@ -63,7 +63,7 @@ This will create a `.epicenv` directory, and add `.epicenv/*/personal` to your `
 
 ### Overlay Environments
 
-Overlay environments let you create environments that inherit from a base environment and override specific variables. This is useful for scenarios like having a `testing` environment that shares most settings with `local` but uses a different S3 bucket.
+Overlay environments let you create environments that inherit from a base environment and override specific variables. This is useful for scenarios like having a `local` which uses a locally run S3-compatible bucket for your development environment, while having a `testing` environment which uses a shared read-only S3 bucket for controlled tests.
 
 ```
 epicenv init -e testing --overlay local
