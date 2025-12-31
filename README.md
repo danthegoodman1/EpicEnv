@@ -105,7 +105,7 @@ epicenv set LOG_LEVEL info -e agent-testing
 - Overlays inherit encryption keys and users from their root environment
 - Inviting users to an overlay will add them to the root environment (with a warning)
 - Personal secrets are also stacked, with each layer able to add or override
-- Removing a variable from an overlay only removes it from that layer; if it exists in an underlay, it will still be visible
+- Removing a variable from an overlay only removes it from that layer. If it exists in an underlay, it will still be visible
 
 ### Set shared environment variables
 
