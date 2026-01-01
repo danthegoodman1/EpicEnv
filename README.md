@@ -19,6 +19,7 @@ _Currently only targets macOS and Linux, but it appears to work on Windows?_
     - [Invite collaborators](#invite-collaborators)
     - [Add headless keys](#add-headless-keys)
     - [Source the environment](#source-the-environment)
+    - [Run commands with environment](#run-commands-with-environment)
     - [Deactivate the environment](#deactivate-the-environment)
     - [Commit the `.epicenv` directory](#commit-the-epicenv-directory)
     - [Remove variables](#remove-variables)
@@ -198,6 +199,37 @@ source .epicenv/myenv/activate
 Your local shell will decrypt and load the variables into the environment!
 
 You can also run this command to update the local environment when changes are pulled from GitHub.
+
+### Run commands with environment
+
+You can run a command with environment variables injected without sourcing the environment into your shell:
+
+```
+epicenv run [--] [command] [args...]
+epicenv -e staging run ./my-binary
+```
+
+Use `--` to separate epicenv flags from the command's flags.
+
+This is useful for:
+- Running one-off commands with a specific environment
+- CI/CD pipelines where you don't want to modify the shell environment
+- Scripts that need to run with different environments
+
+Examples:
+```bash
+# Run tests with local environment
+epicenv run go test ./...
+
+# Run a binary with staging environment
+epicenv -e staging run ./my-binary
+
+# Use in shell scripts (use -- when command has flags)
+epicenv -e production run -- bash -c 'echo $DATABASE_URL'
+
+# Pass flags to the subcommand
+epicenv run -- ./my-binary --help
+```
 
 ### Deactivate the environment
 
