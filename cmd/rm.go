@@ -28,8 +28,7 @@ func runRm(cmd *cobra.Command, args []string) {
 	env := getEnvOrFlag(cmd)
 	envMap := loadEnv(env)
 
-	envVar, exists := envMap[key]
-	if !exists {
+	if _, exists := envMap[key]; !exists {
 		logger.Warn().Msgf("The environment variable %s doesn't exist!", key)
 		os.Exit(1)
 	}
@@ -42,42 +41,46 @@ func runRm(cmd *cobra.Command, args []string) {
 		logger.Fatal().Err(err).Msg("error reading secrets file")
 	}
 
-	// Check if key exists in this environment's secrets
-	keyInThisEnv := lo.ContainsBy(secretsFile.Secrets, func(item EncryptedSecret) bool {
+	sharedEntry, hasSharedEntry := lo.Find(secretsFile.Secrets, func(item EncryptedSecret) bool {
+		return item.Name == key
+	})
+	keyInThisEnv := hasSharedEntry
+
+	personalSecretsFile, err := readSecretsFile(env, true)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		logger.Fatal().Err(err).Msg("error reading personal secrets file")
+	}
+	hasPersonalEntry := personalSecretsFile != nil && lo.ContainsBy(personalSecretsFile.Secrets, func(item EncryptedSecret) bool {
 		return item.Name == key
 	})
 
-	if !keyInThisEnv && !envVar.Personal {
+	isPersonalOverride := hasPersonalEntry && hasSharedEntry && !sharedEntry.Personal && sharedEntry.Value != ""
+
+	if !keyInThisEnv && !hasPersonalEntry {
 		// Key must be coming from an underlay
 		logger.Warn().Msgf("'%s' is defined in an underlay environment, not in '%s' - nothing to remove here", key, env)
 		os.Exit(0)
 	}
 
-	// Purge it
-	secretsFile.Secrets = lo.Filter(secretsFile.Secrets, func(item EncryptedSecret, index int) bool {
-		return item.Name != key
-	})
-	err = writeSecretsFile(env, *secretsFile, false)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("error writing updated secrets file")
-	}
-
-	// If personal, remove it there too
-	if envVar.Personal {
-		logger.Debug().Msgf("%s is personal, removing from personal secrets", key)
-
-		secretsFile, err = readSecretsFile(env, true)
-		if errors.Is(err, os.ErrNotExist) {
-			logger.Fatal().Msg("No secrets file found to delete from")
-		} else if err != nil {
-			logger.Fatal().Err(err).Msg("error reading personal secrets file")
-		}
-
-		// Purge it
+	if isPersonalOverride {
+		logger.Debug().Msgf("%s has a personal override, removing override only", key)
+	} else if keyInThisEnv {
 		secretsFile.Secrets = lo.Filter(secretsFile.Secrets, func(item EncryptedSecret, index int) bool {
 			return item.Name != key
 		})
-		err = writeSecretsFile(env, *secretsFile, true)
+		err = writeSecretsFile(env, *secretsFile, false)
+		if err != nil {
+			logger.Fatal().Err(err).Msg("error writing updated secrets file")
+		}
+	}
+
+	if hasPersonalEntry {
+		logger.Debug().Msgf("%s is personal, removing from personal secrets", key)
+
+		personalSecretsFile.Secrets = lo.Filter(personalSecretsFile.Secrets, func(item EncryptedSecret, index int) bool {
+			return item.Name != key
+		})
+		err = writeSecretsFile(env, *personalSecretsFile, true)
 		if err != nil {
 			logger.Fatal().Err(err).Msg("error writing updated personal secrets file")
 		}

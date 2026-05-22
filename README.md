@@ -154,7 +154,7 @@ If someone sources the environment in the future without setting their own perso
 
 If they attempt to write a personal env var as a shared env var (omitting `-p`), EpicEnv will recognize this and assume they meant personal, while throwing a warning (see safety section for more).
 
-If they attempt to write a shared env var as personal, it will reject the operation and ask the user to `rm` the variable to change it to a personal variable.
+You can set a personal override on an existing shared variable with `-p`; the shared default stays in git and your local value is stored in `personal_secrets.json`. Use `rm` to drop only your override and fall back to the shared default.
 
 ### Invite collaborators
 
@@ -291,7 +291,7 @@ If you attempt to `epicenv set` on a variable that is marked as personal, that s
 
 A warning will be thrown when this occurs.
 
-To make a personal variable shared, first `rm` the personal variable, then set it again as shared. Vice-versa for making a shared variable personal.
+To make a personal variable shared, first `rm` the personal variable, then set it again as shared.
 
 ### Rotating keys
 

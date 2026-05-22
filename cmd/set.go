@@ -24,6 +24,8 @@ Use -p to set a personal variable.
 
 Omit [VALUE] to collect from stdin
 
+Use -p on an existing shared variable to store a personal override; the shared default stays in git.
+
 If you attempt to normal set a personal variable, it will update the personal variable instead. To make a personal variable shared, first rm the variable, then set it again as shared.`,
 	Run:        runSet,
 	Args:       cobra.RangeArgs(1, 2),
@@ -33,7 +35,7 @@ If you attempt to normal set a personal variable, it will update the personal va
 func init() {
 	rootCmd.AddCommand(setCmd)
 
-	setCmd.Flags().BoolP("personal", "p", false, "Set this as a personal environment if it doesn't exist")
+	setCmd.Flags().BoolP("personal", "p", false, "Set as personal (or override a shared default locally)")
 }
 
 func runSet(cmd *cobra.Command, args []string) {
@@ -62,10 +64,11 @@ func runSet(cmd *cobra.Command, args []string) {
 
 func setEnvVar(env, key, val string, personal bool) {
 	envMap := loadEnv(env)
-	// Check if we are setting a personal env var (check merged env for personal status)
 
+	isPersonalOverride := false
 	if envVar, exists := envMap[key]; exists && personal && !envVar.Personal {
-		logger.Fatal().Msgf("Attempting to set an existing shared env var \"%s\" as personal, please rm this env var and set again", key)
+		isPersonalOverride = true
+		logger.Debug().Msgf("Setting personal override for shared env var %q", key)
 	}
 	if envVar, exists := envMap[key]; exists && !personal && envVar.Personal {
 		// update and warn
@@ -109,8 +112,8 @@ func setEnvVar(env, key, val string, personal bool) {
 			Value:    encrypted,
 		})
 
-		if personal {
-			// We need to mark it in the shared secrets that it exists now
+		if personal && !isPersonalOverride {
+			// Mark personal-only keys in shared secrets so collaborators know to set their own value.
 			sharedSecrets, err := readSecretsFile(env, false)
 			if errors.Is(err, os.ErrNotExist) {
 				sharedSecrets = &SecretsFile{}
@@ -118,15 +121,19 @@ func setEnvVar(env, key, val string, personal bool) {
 				logger.Fatal().Err(err).Msg("error reading shared secrets file")
 			}
 
-			sharedSecrets.Secrets = append(sharedSecrets.Secrets, EncryptedSecret{
-				Name:     key,
-				Personal: true,
-				Value:    "",
-			})
+			if !lo.ContainsBy(sharedSecrets.Secrets, func(item EncryptedSecret) bool {
+				return item.Name == key
+			}) {
+				sharedSecrets.Secrets = append(sharedSecrets.Secrets, EncryptedSecret{
+					Name:     key,
+					Personal: true,
+					Value:    "",
+				})
 
-			err = writeSecretsFile(env, *sharedSecrets, false)
-			if err != nil {
-				logger.Fatal().Err(err).Msg("error writing shared secrets file")
+				err = writeSecretsFile(env, *sharedSecrets, false)
+				if err != nil {
+					logger.Fatal().Err(err).Msg("error writing shared secrets file")
+				}
 			}
 		}
 	}

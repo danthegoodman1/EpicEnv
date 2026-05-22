@@ -89,12 +89,8 @@ func loadEnvLayer(env string, symKey []byte, envMap map[string]loadedEnvVar) {
 		logger.Fatal().Err(err).Msgf("error reading shared secrets file for %s, is it corrupted?", env)
 	}
 
-	// Track which keys are personal in this layer (need personal values)
-	var personalKeys []string
-
 	for _, item := range secretsFile.Secrets {
 		if item.Personal {
-			personalKeys = append(personalKeys, item.Name)
 			// Mark as personal placeholder if not already set with a value
 			if existing, exists := envMap[item.Name]; !exists || existing.Value == "" {
 				envMap[item.Name] = loadedEnvVar{
@@ -114,23 +110,21 @@ func loadEnvLayer(env string, symKey []byte, envMap map[string]loadedEnvVar) {
 		}
 	}
 
-	// Load personal secrets for this layer
-	if len(personalKeys) > 0 {
-		personalSecretsFile, err := readSecretsFile(env, true)
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			logger.Fatal().Err(err).Msgf("error reading personal secrets file for %s, is it corrupted?", env)
-		}
+	// Load personal secrets for this layer (overrides shared values when present)
+	personalSecretsFile, err := readSecretsFile(env, true)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		logger.Fatal().Err(err).Msgf("error reading personal secrets file for %s, is it corrupted?", env)
+	}
 
-		if personalSecretsFile != nil {
-			for _, item := range personalSecretsFile.Secrets {
-				decrypted, err := decryptAESGCM(symKey, item.Value)
-				if err != nil {
-					logger.Fatal().Err(err).Msgf("error decrypting personal environment variable %s", item.Name)
-				}
-				envMap[item.Name] = loadedEnvVar{
-					Value:    decrypted,
-					Personal: true,
-				}
+	if personalSecretsFile != nil {
+		for _, item := range personalSecretsFile.Secrets {
+			decrypted, err := decryptAESGCM(symKey, item.Value)
+			if err != nil {
+				logger.Fatal().Err(err).Msgf("error decrypting personal environment variable %s", item.Name)
+			}
+			envMap[item.Name] = loadedEnvVar{
+				Value:    decrypted,
+				Personal: true,
 			}
 		}
 	}
