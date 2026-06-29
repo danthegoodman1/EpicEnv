@@ -129,7 +129,7 @@ You can also import an existing `.env` file with:
 epicenv import PATH
 ```
 
-If a line ends with `#personal` like:
+If a line has an unquoted trailing `#personal` annotation like:
 
 ```ini
 shared_thing="this val is shared"
@@ -137,6 +137,10 @@ personal_thing="this val is personal" #personal
 ```
 
 then it will automatically be added as a personal variable. This is very convenient if you have an existing `.env` file to import that has many mixed shared and personal env vars. EpicEnv will log when it imports a personal value.
+
+Quoted values can contain a literal `#personal` without being marked personal, for example `shared_thing="foo #personal"`.
+
+`epicenv envfile` emits quoted `.env` values for dotenv parsers that support single-, double-, and backtick-quoted values, such as Node dotenv. It is not intended to be sourced directly by a shell. Personal values get a trailing ` #personal` annotation.
 
 Imports will overwrite existing values, using the rules for personal flag collisions mentioned below.
 

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -31,28 +32,29 @@ func runEnvfile(cmd *cobra.Command, args []string) {
 			continue
 		}
 
-		// Escape backslashes in the value
-		escapedValue := escapeBackslashes(val.Value)
-
 		if val.Personal {
 			// Add comment for personal vars
-			fmt.Printf("%s=%s #personal\n", key, wrapQuotesIfNeeded(escapedValue))
+			fmt.Printf("%s=%s #personal\n", key, formatEnvfileValue(val.Value))
 		} else {
-			fmt.Printf("%s=%s\n", key, wrapQuotesIfNeeded(escapedValue))
+			fmt.Printf("%s=%s\n", key, formatEnvfileValue(val.Value))
 		}
 	}
 }
 
-// escapeBackslashes replaces each backslash with three backslashes because bash
-func escapeBackslashes(s string) string {
-	// Replace each \ with \\
-	var result string
-	for _, c := range s {
-		if c == '\\' {
-			result += "\\\\"
-		} else {
-			result += string(c)
-		}
+func formatEnvfileValue(s string) string {
+	if !strings.Contains(s, `'`) {
+		return `'` + s + `'`
 	}
-	return result
+	if !strings.Contains(s, `"`) {
+		return `"` + s + `"`
+	}
+	if !strings.Contains(s, "`") {
+		return "`" + s + "`"
+	}
+
+	escaped := strings.NewReplacer(
+		`\`, `\\`,
+		`"`, `\"`,
+	).Replace(s)
+	return `"` + escaped + `"`
 }
