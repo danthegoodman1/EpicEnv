@@ -73,12 +73,12 @@ func runInternalGenCmd(cmd *cobra.Command, args []string) {
 }
 
 func wrapQuotesIfNeeded(s string) string {
-	// Escape any existing quotes and dollar signs
-	s = strings.ReplaceAll(s, "\"", "\\\"")
-	s = strings.ReplaceAll(s, "$", "\\$")
+	if s == "" {
+		return "''"
+	}
 
-	if strings.Contains(s, " ") && s[0:1] != "\"" && s[len(s)-1:] != "\"" {
-		return "\"" + s + "\""
+	if strings.ContainsAny(s, " \t\n\r\"'$`\\") {
+		return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
 	}
 
 	return s

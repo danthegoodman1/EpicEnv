@@ -140,7 +140,7 @@ then it will automatically be added as a personal variable. This is very conveni
 
 Quoted values can contain a literal `#personal` without being marked personal, for example `shared_thing="foo #personal"`.
 
-`epicenv envfile` emits quoted `.env` values for dotenv parsers that support single-, double-, and backtick-quoted values, such as Node dotenv. It is not intended to be sourced directly by a shell. Personal values get a trailing ` #personal` annotation.
+`epicenv envfile` emits quoted `.env` values for EpicEnv import/export and dotenv parsers that support single-, double-, and backtick-quoted values, such as Node dotenv. It is not intended to be sourced directly by a shell. Personal values get a trailing ` #personal` annotation. Values containing all quote delimiter types use EpicEnv-compatible fallback escaping that may not round-trip exactly through every third-party dotenv parser.
 
 Imports will overwrite existing values, using the rules for personal flag collisions mentioned below.
 

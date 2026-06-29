@@ -56,6 +56,16 @@ func TestFormatEnvfileValueAvoidsBacktickDelimiterWhenValueContainsBacktick(t *t
 	}
 }
 
+func TestFormatEnvfileValuePrefersBackticksBeforeDoubleQuotes(t *testing.T) {
+	value := `can't expand \n or \r`
+	got := formatEnvfileValue(value)
+	want := "`" + value + "`"
+
+	if got != want {
+		t.Fatalf("formatEnvfileValue() = %q, want %q", got, want)
+	}
+}
+
 func TestParseEnvfileLineDistinguishesPersonalAnnotation(t *testing.T) {
 	_, got, personal, ok := parseEnvfileLine("KEY='foo #personal'")
 	if !ok {

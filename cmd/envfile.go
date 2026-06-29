@@ -45,11 +45,11 @@ func formatEnvfileValue(s string) string {
 	if !strings.Contains(s, `'`) {
 		return `'` + s + `'`
 	}
-	if !strings.Contains(s, `"`) {
-		return `"` + s + `"`
-	}
 	if !strings.Contains(s, "`") {
 		return "`" + s + "`"
+	}
+	if !strings.Contains(s, `"`) {
+		return `"` + s + `"`
 	}
 
 	escaped := strings.NewReplacer(

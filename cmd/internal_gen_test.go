@@ -4,18 +4,20 @@ import "testing"
 
 func TestWrapQuotesIfNeeded(t *testing.T) {
 	tests := []struct {
-		Val          string
-		ShouldChange bool
+		Val  string
+		Want string
 	}{
-		{Val: "thing", ShouldChange: false},
-		{Val: "hey who", ShouldChange: true},
-		{Val: "\"hey who\"", ShouldChange: false},
+		{Val: "thing", Want: "thing"},
+		{Val: "hey who", Want: "'hey who'"},
+		{Val: "\"hey who\"", Want: "'\"hey who\"'"},
+		{Val: "can't", Want: "'can'\\''t'"},
+		{Val: "$TOKEN", Want: "'$TOKEN'"},
 	}
 
 	for _, item := range tests {
-		newVal := wrapQuotesIfNeeded(item.Val)
-		if (newVal == item.Val) == item.ShouldChange {
-			t.Fatalf("Failed on %s got %s", item.Val, newVal)
+		got := wrapQuotesIfNeeded(item.Val)
+		if got != item.Want {
+			t.Fatalf("wrapQuotesIfNeeded(%q) = %q, want %q", item.Val, got, item.Want)
 		}
 	}
 }
